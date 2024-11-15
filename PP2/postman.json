@@ -1,0 +1,3505 @@
+{
+	"info": {
+		"_postman_id": "eaf7c7ea-12f4-4612-b707-06de8bb6098a",
+		"name": "API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39032488"
+	},
+	"item": [
+		{
+			"name": "Blogpost API",
+			"item": [
+				{
+					"name": "Create Blog Post - Without Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+									"pm.test('Response contains newBlogPost object', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('newBlogPost');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"My First Blog Post\",\n    \"description\": \"This is a description.\",\n    \"tag\": \"development\",\n    \"content\": \"Content of the blog post.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Blog Post - With Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+									"pm.test('Response contains newBlogPost object', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('newBlogPost');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"title\": \"My First Blog Post\", \"description\": \"This is a description.\", \"tag\": \"development\", \"content\": \"Content of the blog post.\", \"templateIds\": [1, 2]}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Blog Post - Missing Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 400', function () { pm.response.to.have.status(400); });",
+									"pm.test('Error message for missing fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error', 'Title, description, tags, and content are required');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"This post has missing title and content.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch All Blog Posts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+									"pm.test('Response contains filteredPosts array', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('filteredPosts');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch All Blog Posts - Paginated",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+									"pm.test('Response contains filteredPosts array', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('filteredPosts');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Blog Post by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/?id=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Blog Post by Title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/?title=my%20first",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								""
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "my%20first"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Blog Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () { pm.response.to.have.status(401); });",
+									"pm.test('Unauthorized error message', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error', 'Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Title\",\n    \"description\": \"Updated description.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hide Blog Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () { pm.response.to.have.status(401); });",
+									"pm.test('Unauthorized error message', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error', 'Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isHidden\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Blog Post - Unauthorized isHidden Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Title\",\n    \"description\": \"Updated description\",\n    \"isHidden\": \"true\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Blog Post",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/blogposts/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"blogposts",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users API",
+			"item": [
+				{
+					"name": "Sign Up (User 1)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Up (User 2)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123456\",\n  \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/signup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Up - Missing Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Up - Invalid Email Format",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"email\": \"invalid-email\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Up - Existing Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Sign Up - Weak Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Alice\",\n  \"lastName\": \"Smith\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"short\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/signup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@scriptorium.com\",\n  \"password\": \"adminpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Incorrect Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID - Self",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID - Another User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID - Nonexisting User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\",\n  \"email\": \"jane.doe@example.com\",\n  \"avatar\": \"new_avatar_url\",\n  \"phone\": \"1234567890\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID - Duplicate Email",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/users/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Access Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsInJvbGUiOiJVU0VSIiwiZXhwaXJlc0F0IjoxNzMwNTIxNDY5LCJpYXQiOjE3MzA1MjA1NjksImV4cCI6MTczMDYwNjk2OX0.XAdZuvPjitrvq5cmT304CcccQf27-xDeoIB6epD97Wk\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Access Token - Invalid Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refreshToken\": \"invalid_token_here\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Code execution",
+			"item": [
+				{
+					"name": "General Scenarios",
+					"item": [
+						{
+							"name": "Method Not Allowed",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing Body Parameters - Code",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"language\": \"{{language}}\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Missing Body Parameters - Language",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"{{code}}\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Unsupported Language",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"{{code}}\", \"language\": \"ruby\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Python Tests",
+					"item": [
+						{
+							"name": "Basic Execution",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"print('Hello, world!')\", \"language\": \"py\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Basic Execution - Error",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"printf('Hello, world!')\", \"language\": \"py\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Standard Input",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"input_str = input(); print(f'Received: {input_str}')\", \"language\": \"py\", \"stdin\": \"test_input\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "JavaScript Tests",
+					"item": [
+						{
+							"name": "Basic Execution",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"console.log('Hello, world!')\", \"language\": \"js\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Basic Execution - Error",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"consoles.log('Hello, world!')\", \"language\": \"js\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Standard Input",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"process.stdin.on('data', (data) => { const input = data.toString().trim(); console.log(`Received: ${input}`); });\",\n    \"language\": \"js\",\n    \"stdin\": \"test_input\"\n}\n"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "C Tests",
+					"item": [
+						{
+							"name": "Basic Execution",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { printf(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Basic Execution - Error",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { print(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Standard Input",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { char input[50]; scanf(\\\"%s\\\", input); printf(\\\"Received: %s\\\", input); return 0; }\", \"language\": \"c\", \"stdin\": \"test_input\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "C++ Tests",
+					"item": [
+						{
+							"name": "Basic Execution",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::codt << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Basic Execution - Error",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::csout << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Standard Input",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::string input; std::cin >> input; std::cout << \\\"Received: \\\" << input << std::endl; return 0; }\", \"language\": \"cpp\", \"stdin\": \"test_input\"}"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Java Tests",
+					"item": [
+						{
+							"name": "Basic Execution",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"public class TempJavaClass { public static void main(String[] args) { System.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); } }\",\n    \"language\": \"java\"\n}\n"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Basic Execution - Error",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"public static void main(String[] args) { Systdem.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); }\",\n    \"language\": \"java\"\n}\n"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Standard Input",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"import java.util.Scanner; public class TempJavaClass { public static void main(String[] args) { Scanner sc = new Scanner(System.in); String input = sc.nextLine(); System.out.println(\\\"Received: \\\" + input); } }\",\n    \"language\": \"java\",\n    \"stdin\": \"test_input\"\n}\n"
+								},
+								"url": {
+									"raw": "{{base_url}}/execute",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"execute"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Ratings API",
+			"item": [
+				{
+					"name": "Create Rating - Upvote BlogPost",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"UPVOTE\",\n  \"blogPostId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Downvote Comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"DOWNVOTE\",\n  \"commentId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Unauthorized",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"UPVOTE\",\n  \"blogPostId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Missing Parameters",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Rating - Nonexistent Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"DOWNVOTE\",\n  \"commentId\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Change Vote Type",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"DOWNVOTE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Unauthorized User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{invalid_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"UPVOTE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rating - Not Found",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"votetype\": \"DOWNVOTE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/ratings/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Successful Deletion",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/ratings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Unauthorized User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{invalid_auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/ratings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Admin Deletion of Another User's Rating",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/ratings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Rating - Rating Not Found",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/ratings/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ratings",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Comments API",
+			"item": [
+				{
+					"name": "Create Comment - Valid Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"This is a test comment\",\n    \"blogPostId\": 1,\n    \"parentId\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment - Invalid ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments/100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"100"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment - Unauthorized",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer incorrect_or_expired_token"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment - Valid Data",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Updated comment content\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hide Comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isHidden\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment - Valid",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch All Comments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Specific Comment - Valid ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fetch Specific Comment - Invalid ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments/100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"100"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment - Missing Fields",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Comments - With Pagination",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/comments?pageSize=5&page=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "5"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Nested Comment - Valid",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"This is a nested reply\",\n    \"blogPostId\": 1,\n    \"parentId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Nested Comment - Valid",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Updated nested comment content\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Nested Comment - Valid",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/comments/6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"comments",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CodeTemplates API",
+			"item": [
+				{
+					"name": "Create Code Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains newTemplate object with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title', 'Sample Template');",
+									"    pm.expect(jsonData).to.have.property('code', \"console.log('Hello, World!');\");",
+									"    pm.expect(jsonData).to.have.property('explanation', 'This template logs a greeting to the console.');",
+									"    pm.expect(jsonData).to.have.property('tags', 'javascript,console,greeting');",
+									"    pm.expect(jsonData).to.have.property('language', 'JavaScript');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('forkedFromId', null);",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Sample Template\",\n    \"code\": \"console.log('Hello, World!');\",\n    \"explanation\": \"This template logs a greeting to the console.\",\n    \"tags\": [\"javascript\", \"console\", \"greeting\"],\n    \"language\": \"JavaScript\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Code Template - Missing Field",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains newTemplate object with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title', 'Sample Template');",
+									"    pm.expect(jsonData).to.have.property('code', \"console.log('Hello, World!');\");",
+									"    pm.expect(jsonData).to.have.property('explanation', 'This template logs a greeting to the console.');",
+									"    pm.expect(jsonData).to.have.property('tags', 'javascript,console,greeting');",
+									"    pm.expect(jsonData).to.have.property('language', 'JavaScript');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('forkedFromId', null);",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Sample Template\",\n    \"code\": \"console.log('Hello, World!');\",\n    \"explanation\": \"This template logs a greeting to the console.\",\n    \"language\": \"JavaScript\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Code Template - Forked",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains newTemplate object with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title', 'Sample Template');",
+									"    pm.expect(jsonData).to.have.property('code', \"console.log('Hello, World!');\");",
+									"    pm.expect(jsonData).to.have.property('explanation', 'This template logs a greeting to the console.');",
+									"    pm.expect(jsonData).to.have.property('tags', 'javascript,console,greeting');",
+									"    pm.expect(jsonData).to.have.property('language', 'JavaScript');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('forkedFromId', null);",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Code Templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Each template has required fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(template => {",
+									"        pm.expect(template).to.have.property('id');",
+									"        pm.expect(template).to.have.property('title');",
+									"        pm.expect(template).to.have.property('code');",
+									"        pm.expect(template).to.have.property('explanation');",
+									"        pm.expect(template).to.have.property('tags');",
+									"        pm.expect(template).to.have.property('language');",
+									"        pm.expect(template).to.have.property('userId');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Code Templates with pagination",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Each template has required fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(template => {",
+									"        pm.expect(template).to.have.property('id');",
+									"        pm.expect(template).to.have.property('title');",
+									"        pm.expect(template).to.have.property('code');",
+									"        pm.expect(template).to.have.property('explanation');",
+									"        pm.expect(template).to.have.property('tags');",
+									"        pm.expect(template).to.have.property('language');",
+									"        pm.expect(template).to.have.property('userId');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Templates by Title",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"All returned templates have titles containing 'Sample Template'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(template) {",
+									"        pm.expect(template.title).to.include('Sample Template');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates?title=sample",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "sample"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Templates by Tags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"All returned templates have 'javascript' in their tags\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(template) {",
+									"        pm.expect(template.tags.toLowerCase()).to.include('javascript');",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates?tags=updated",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							],
+							"query": [
+								{
+									"key": "tags",
+									"value": "updated"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Templates by Content",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"All returned templates contain 'console.log' in code or explanation\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    jsonData.forEach(function(template) {",
+									"        var codeContains = template.code.includes('console.log');",
+									"        var explanationContains = template.explanation.includes('console.log');",
+									"        pm.expect(codeContains || explanationContains).to.be.true;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates?content=console.log",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates"
+							],
+							"query": [
+								{
+									"key": "content",
+									"value": "console.log"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Code Template by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains template details with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('code');",
+									"    pm.expect(jsonData).to.have.property('explanation');",
+									"    pm.expect(jsonData).to.have.property('tags');",
+									"    pm.expect(jsonData).to.have.property('language');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('forkedFromId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Code Templates - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains template details with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('code');",
+									"    pm.expect(jsonData).to.have.property('explanation');",
+									"    pm.expect(jsonData).to.have.property('tags');",
+									"    pm.expect(jsonData).to.have.property('language');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('forkedFromId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates/?title=nonexistent",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates",
+								""
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "nonexistent"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Code Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains updated template with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('title', 'Updated Template Title');",
+									"    pm.expect(jsonData).to.have.property('code', 'console.log(\"Updated Content\");');",
+									"    pm.expect(jsonData).to.have.property('explanation', 'Updated explanation.');",
+									"    pm.expect(jsonData).to.have.property('tags', 'javascript,updated');",
+									"    pm.expect(jsonData).to.have.property('language', 'JavaScript');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Template Title\",\n    \"code\": \"console.log(\\\"Updated Content\\\");\",\n    \"explanation\": \"Updated explanation.\",\n    \"tags\": [\"javascript\", \"updated\"],\n    \"language\": \"JavaScript\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Code Template",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains success message', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('message', 'Template deleted successfully');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/codetemplates/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"codetemplates",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports API",
+			"item": [
+				{
+					"name": "Report Blog Post",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains report with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('blogPostId', 1);",
+									"    pm.expect(jsonData).to.have.property('content', 'This post contains inappropriate content.');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"blogPostId\": 1,\n  \"content\": \"This post contains inappropriate content.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report Blog Post - Nonexistent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains report with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('blogPostId', 1);",
+									"    pm.expect(jsonData).to.have.property('content', 'This post contains inappropriate content.');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"blogPostId\": 100,\n  \"content\": \"This post contains inappropriate content.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains report with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('commentId', 1);",
+									"    pm.expect(jsonData).to.have.property('content', 'This comment is offensive.');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"commentId\": 1,\n  \"content\": \"This comment is offensive.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report Comment - Nonexistent",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response contains report with correct fields', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('commentId', 1);",
+									"    pm.expect(jsonData).to.have.property('content', 'This comment is offensive.');",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"commentId\": 100\n  \"content\": \"This comment is offensive.\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reports",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Reports are sorted by total number of reports', function () {",
+									"    var jsonData = pm.response.json();",
+									"    let sorted = true;",
+									"    for (let i = 0; i < jsonData.length - 1; i++) {",
+									"        if (jsonData[i].reportCount < jsonData[i + 1].reportCount) {",
+									"            sorted = false;",
+									"            break;",
+									"        }",
+									"    }",
+									"    pm.expect(sorted).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/reports",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"reports"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000/api",
+			"type": "default"
+		},
+		{
+			"key": "auth",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsInJvbGUiOiJVU0VSIiwiZXhwaXJlc0F0IjoxNzMwNTIwOTczLCJpYXQiOjE3MzA1MjAwNzMsImV4cCI6MTczMDUyMDk3M30.OivQk-4OqHyvCbFKFcX1DOO0tg-iYEIOLTsKWO4aii4"
+		}
+	]
+}
