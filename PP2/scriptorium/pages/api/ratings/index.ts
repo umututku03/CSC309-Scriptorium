@@ -1,13 +1,18 @@
-// pages/api/ratings/index.js
+import { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
 import { verifyAuthorizationHeader } from '@/utils/auth';
 
-export default async function handler(req, res) {
+interface AuthUser {
+    userId: number;
+    role: string;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Authorization check with detailed error handling
-    let authUser;
+    let authUser: AuthUser;
     try {
-        authUser = verifyAuthorizationHeader(req.headers.authorization);
-    } catch (error) {
+        authUser = verifyAuthorizationHeader(req.headers.authorization as string);
+    } catch (error: any) {
         return res.status(401).json({ error: "Unauthorized", details: error.message });
     }
 
@@ -56,7 +61,7 @@ export default async function handler(req, res) {
                         await prisma.blogPost.update({
                             where: { id: blogPostId },
                             data: {
-                                upvotes: existingRating.votetype === 'UPVOTE' ? { decrement: 1 } : { increment: 1},
+                                upvotes: existingRating.votetype === 'UPVOTE' ? { decrement: 1 } : { increment: 1 },
                                 downvotes: existingRating.votetype === 'DOWNVOTE' ? { decrement: 1 } : { increment: 1 }
                             }
                         });
@@ -115,7 +120,7 @@ export default async function handler(req, res) {
         } else {
             return res.status(405).json({ error: "Method Not Allowed" });
         }
-    } catch (error) {
+    } catch (error: any) {
         return res.status(500).json({ error: 'Internal Server Error', details: error.message });
     }
 }
