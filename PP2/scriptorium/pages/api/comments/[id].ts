@@ -1,17 +1,26 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyAuthorizationHeader } from '@/utils/auth';
 import prisma from '@/lib/prisma';
 
-export default async function handler(req, res) {
+interface AuthUser {
+    userId: number;
+    role: string;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { id } = req.query;
 
     try {
         if (req.method === 'GET') {
-            const authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
+            const authUser: AuthUser | null = req.headers.authorization 
+                ? verifyAuthorizationHeader(req.headers.authorization) 
+                : null;
+            
             const comment = await prisma.comment.findUnique({
-                where: { id: parseInt(id) },
+                where: { id: parseInt(id as string) },
                 include: {
-                    children:{
-                        select:{
+                    children: {
+                        select: {
                             id: true
                         }
                     },
@@ -35,18 +44,17 @@ export default async function handler(req, res) {
 
             res.status(200).json(comment);
         } else if (req.method === 'PUT') {
-            // Verify user token and extract user data
-            let authUser;
+            let authUser: AuthUser;
             try {
-                authUser = verifyAuthorizationHeader(req.headers.authorization);
-            } catch (error) {
+                authUser = verifyAuthorizationHeader(req.headers.authorization as string);
+            } catch (error: any) {
                 return res.status(401).json({ error: "Unauthorized", details: error.message });
             }
 
             const { content, isHidden } = req.body;
 
             const comment = await prisma.comment.findUnique({
-                where: { id: parseInt(id) }
+                where: { id: parseInt(id as string) }
             });
 
             if (!comment) {
@@ -62,7 +70,7 @@ export default async function handler(req, res) {
             }
 
             const updatedComment = await prisma.comment.update({
-                where: { id: parseInt(id) },
+                where: { id: parseInt(id as string) },
                 data: {
                     content,
                     isHidden
@@ -71,15 +79,15 @@ export default async function handler(req, res) {
 
             res.status(200).json({ message: "Comment updated successfully", updatedComment });
         } else if (req.method === 'DELETE') {
-            let authUser;
+            let authUser: AuthUser;
             try {
-                authUser = verifyAuthorizationHeader(req.headers.authorization);
-            } catch (error) {
+                authUser = verifyAuthorizationHeader(req.headers.authorization as string);
+            } catch (error: any) {
                 return res.status(401).json({ error: "Unauthorized", details: error.message });
             }
-            
+
             const comment = await prisma.comment.findUnique({
-                where: { id: parseInt(id) }
+                where: { id: parseInt(id as string) }
             });
 
             if (!comment) {
@@ -91,7 +99,7 @@ export default async function handler(req, res) {
             }
 
             await prisma.comment.delete({
-                where: { id: parseInt(id) }
+                where: { id: parseInt(id as string) }
             });
 
             res.status(200).json({ message: "Comment deleted successfully" });
@@ -99,7 +107,7 @@ export default async function handler(req, res) {
             res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }

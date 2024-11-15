@@ -1,14 +1,19 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyAuthorizationHeader } from '@/utils/auth';
 import prisma from '@/lib/prisma';
 
-export default async function handler(req, res) {
+interface AuthUser {
+    userId: number;
+    role: string;
+}
 
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (req.method === "POST") {
-            let authUser;
+            let authUser: AuthUser;
             try {
-                authUser = verifyAuthorizationHeader(req.headers.authorization);
-            } catch (error) {
+                authUser = verifyAuthorizationHeader(req.headers.authorization as string);
+            } catch (error: any) {
                 return res.status(401).json({ error: "Unauthorized", details: error.message });
             }
 
@@ -25,7 +30,7 @@ export default async function handler(req, res) {
                     return res.status(404).json({ error: "Parent comment not found" });
                 }
                 if (parentComment.blogPostId !== blogPostId) {
-                    return res.status(400).json({ error: "Blog Post ID is not the same as parent"});
+                    return res.status(400).json({ error: "Blog Post ID is not the same as parent" });
                 }
                 if (parentComment.isHidden && !(authUser.role === "ADMIN" || authUser.userId === parentComment.userId)) {
                     return res.status(400).json({ error: "Cannot reply to hidden comment" });
@@ -50,14 +55,17 @@ export default async function handler(req, res) {
             const newComment = await prisma.comment.create({ data: newCommentData });
             return res.status(201).json({ message: 'Comment created successfully', newComment });
         } else if (req.method === "GET") {
-            const authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
+            const authUser: AuthUser | null = req.headers.authorization 
+                ? verifyAuthorizationHeader(req.headers.authorization as string) 
+                : null;
+            
             const { blogPostId, pageSize, page = 1 } = req.query;
-            let limit = parseInt(pageSize || 10, 10);
-            const skip = (page - 1) * limit;
+            const limit = parseInt(pageSize as string || '10', 10);
+            const skip = (parseInt(page as string, 10) - 1) * limit;
 
             const comments = await prisma.comment.findMany({
                 where: {
-                    blogPostId: blogPostId ? parseInt(blogPostId, 10) : undefined,
+                    blogPostId: blogPostId ? parseInt(blogPostId as string, 10) : undefined,
                 },
                 include: {
                     children: {
@@ -93,7 +101,7 @@ export default async function handler(req, res) {
             res.setHeader('Allow', ['POST', 'GET']);
             res.status(405).end(`Method ${req.method} Not Allowed`);
         }
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
         res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
