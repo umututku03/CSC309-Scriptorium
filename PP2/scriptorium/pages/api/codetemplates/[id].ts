@@ -1,13 +1,17 @@
-// pages/api/codetemplates/[id].js
-
+import { NextApiRequest, NextApiResponse } from 'next';
 import { verifyAuthorizationHeader } from "@/utils/auth";
 import prisma from "@/lib/prisma";
 
-export default async function handler(req, res) {
+interface AuthUser {
+    userId: number;
+    role?: string;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
   // Convert id to integer
-  const templateId = parseInt(id, 10);
+  const templateId = parseInt(id as string, 10);
   if (isNaN(templateId)) {
     return res.status(400).json({ error: "Invalid template ID" });
   }
@@ -32,25 +36,27 @@ export default async function handler(req, res) {
       return res.status(200).json(template);
     } catch (error) {
       console.error("Error fetching template:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch template", details: error.message });
+      return res.status(500).json({ error: "Failed to fetch template" });
     }
   }
 
   // Authenticate user for POST, PUT and DELETE operations
-  const authUser = verifyAuthorizationHeader(req.headers.authorization);
-  if (!authUser) {
-    return res.status(401).json({ error: "Unauthorized" });
+  let authUser: AuthUser | null;
+  try {
+      authUser = verifyAuthorizationHeader(req.headers.authorization as string);
+      if (!authUser) {
+          return res.status(401).json({ error: "Unauthorized" });
+      }
+  } catch (error) {
+      return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // POST API route for creating a fork from existing code template
   if (req.method === "POST") {
     try {
       const existingTemplate = await prisma.codeTemplate.findUnique({
         where: { id: templateId },
       });
-  
+
       if (!existingTemplate) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -69,13 +75,11 @@ export default async function handler(req, res) {
       return res.status(201).json(forkedTemplate);
     } catch (error) {
       console.error("Error creating template:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to create template", details: error.message });
+      return res.status(500).json({ error: "Failed to create template" });
     }
   }
 
-  // Check if the template exists and belongs to the authenticated user
+  // PUT and DELETE require the template to exist and the user to own the template
   let existingTemplate;
   try {
     existingTemplate = await prisma.codeTemplate.findUnique({
@@ -93,13 +97,17 @@ export default async function handler(req, res) {
     }
   } catch (error) {
     console.error("Error fetching template for authorization:", error);
-    return res
-      .status(500)
-      .json({ error: "Failed to authorize template", details: error.message });
+    return res.status(500).json({ error: "Failed to authorize template" });
   }
 
   if (req.method === "PUT") {
-    const { title, code, explanation, tags, language } = req.body;
+    const { title, code, explanation, tags, language } = req.body as {
+      title: string;
+      code: string;
+      explanation: string;
+      tags: string[];
+      language: string;
+    };
 
     // Convert tags array to a comma-separated string
     const tagsString = Array.isArray(tags) ? tags.join(",") : tags;
@@ -119,9 +127,7 @@ export default async function handler(req, res) {
       return res.status(200).json(updatedTemplate);
     } catch (error) {
       console.error("Error updating template:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to update template", details: error.message });
+      return res.status(500).json({ error: "Failed to update template" });
     }
   }
 
@@ -134,12 +140,9 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: "Template deleted successfully" });
     } catch (error) {
       console.error("Error deleting template:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to delete template", details: error.message });
+      return res.status(500).json({ error: "Failed to delete template" });
     }
   }
 
-  // If method is not GET, PUT, or DELETE
   return res.status(405).json({ error: "Method not allowed" });
 }
