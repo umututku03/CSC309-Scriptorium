@@ -1,17 +1,23 @@
-// prisma/seed.js
-const bcrypt = require("bcrypt");
-const { PrismaClient } = require('@prisma/client');
+// Importing necessary modules using ES6 syntax
+import bcrypt from "bcrypt";
+import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminEmail: string | undefined = process.env.ADMIN_EMAIL;
+  const adminPassword: string | undefined = process.env.ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
     console.error("Admin credentials not set in environment variables.");
     process.exit(1);
   }
-  const hashedPassword = await bcrypt.hash(adminPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+
+  // Ensure BCRYPT_SALT_ROUNDS is defined and convert it safely to a number
+  const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10');
+
+  const hashedPassword = await bcrypt.hash(adminPassword, saltRounds);
+
   await prisma.user.upsert({
     where: { email: adminEmail },
     update: {},
@@ -19,7 +25,7 @@ async function main() {
       firstName: 'Admin',
       lastName: 'User',
       email: adminEmail,
-      password: hashedPassword, // Hash this in production
+      password: hashedPassword, // Hashed password used
       role: 'ADMIN',
     },
   });
