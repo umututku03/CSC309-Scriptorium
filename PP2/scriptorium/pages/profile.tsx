@@ -9,6 +9,7 @@ export default function Profile() {
     avatar: "",
     phone: "",
   });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
