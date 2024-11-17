@@ -52,11 +52,11 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-80"
-      >
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg">
+      <header className="text-4xl text-blue-900 font-bold mb-8">
+        Scriptorium
+      </header>
+      <div className="bg-white p-6 rounded shadow-md w-80">
         <h2 className="text-2xl mb-4">Profile</h2>
         {error && <p className="text-red-500">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
@@ -102,11 +102,11 @@ export default function Profile() {
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white p-2 rounded w-full"
+          className="bg-blue-900 text-white p-2 rounded w-full"
         >
           Update
         </button>
-      </form>
+      </div>
     </div>
   );
 }
