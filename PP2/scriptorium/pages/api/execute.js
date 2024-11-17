@@ -1,4 +1,3 @@
-// pages/api/execute.js
 import { exec } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
@@ -20,101 +19,101 @@ export default async function handler(req, res) {
   try {
     await fs.mkdir(projectTmpDir, { recursive: true });
   } catch (err) {
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Failed to create tmp directory' });
   }
-  let filePath = path.join(projectTmpDir, `temp_code.${language}`);
-  if (language === "java") {
-    var className = 'TempJavaClass';
-    filePath = path.join(projectTmpDir, `${className}.java`);
+
+  // Map language to file extension
+  const extensions = {
+    py: 'py',
+    js: 'js',
+    c: 'c',
+    cpp: 'cpp',
+    java: 'java',
+    go: 'go',
+    rs: 'rs',
+    rb: 'rb',
+    php: 'php',
+    swift: 'swift',
+    pl: 'pl',
+    sh: 'sh',
+    ts: 'ts',
+    r: 'r',
+  };
+
+  const extension = extensions[language];
+  if (!extension) {
+    return res.status(400).json({ error: 'Unsupported language' });
   }
+
+  const fileName = language === 'java' ? 'TempJavaClass.java' : `temp_code.${extension}`;
+  const filePath = path.join(projectTmpDir, fileName);
   const inputPath = path.join(projectTmpDir, 'temp_input.txt');
-  const outputPath = path.join(projectTmpDir, 'temp_output.txt');
 
   try {
     await fs.writeFile(filePath, code);
     if (stdin) {
-        await fs.writeFile(inputPath, stdin);
+      await fs.writeFile(inputPath, stdin);
     }
   } catch (err) {
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Failed to write code or input files' });
   }
 
-  let command;
-  switch (language) {
-    case 'py':
-      if (stdin){
-        command = `python3 "${filePath}" < "${inputPath}" > "${outputPath}"`;
-      }
-      else {
-        command = `python3 "${filePath}" > "${outputPath}"`;
-      }
-      break;
-    case 'js':
-      if (stdin) {
-        command = `node "${filePath}" < "${inputPath}" > "${outputPath}"`;
-      }
-      else {
-        command = `node "${filePath}" > "${outputPath}"`;
-      }
-      break;
-    case 'c':
-      if (stdin) {
-        command = `gcc "${filePath}" -o "${filePath}.out" && "${filePath}.out" < "${inputPath}" > "${outputPath}"`;
-      }
-      else {
-        command = `gcc "${filePath}" -o "${filePath}.out" && "${filePath}.out" > "${outputPath}"`;
-      }
-      break;
-    case 'cpp':
-      if (stdin) {
-        command = `g++ "${filePath}" -o "${filePath}.out" && "${filePath}.out" < "${inputPath}" > "${outputPath}"`;
-      }
-      else {
-        command = `g++ "${filePath}" -o "${filePath}.out" && "${filePath}.out" > "${outputPath}"`;
-      }
-      break;
-    case 'java':
-      if (stdin) {
-        command = `javac "${filePath}" && java -cp "${projectTmpDir}" ${className} < "${inputPath}" > "${outputPath}"`;
-      } else {
-        command = `javac "${filePath}" && java -cp "${projectTmpDir}" ${className} > "${outputPath}"`;
-      }
-      break;
-    default:
-      return res.status(400).json({ error: 'Unsupported language' });
+  // Map language to Docker image
+  const dockerImages = {
+    py: 'sandbox_python',
+    js: 'sandbox_js',
+    c: 'sandbox_c',
+    cpp: 'sandbox_cpp',
+    java: 'sandbox_java',
+    go: 'sandbox_go',
+    rs: 'sandbox_rs',
+    rb: 'sandbox_rb',
+    php: 'sandbox_php',
+    swift: 'sandbox_swift',
+    pl: 'sandbox_pl',
+    sh: 'sandbox_sh',
+    ts: 'sandbox_ts',
+    r: 'sandbox_r',
+  };
+
+  const dockerImage = dockerImages[language];
+  if (!dockerImage) {
+    return res.status(400).json({ error: 'Unsupported language' });
   }
+
+  // Build Docker command
+  const dockerCommand = [
+    'docker run --rm',
+    `-v ${projectTmpDir}:/sandbox`, // Mount tmp directory to /sandbox in the container
+    dockerImage,
+    language === 'java' ? 'TempJavaClass' : `temp_code.${extension}`, // Pass the file name
+  ];
+
+  console.log(`Executing Docker command: ${dockerCommand.join(' ')}`);
 
   try {
-    await new Promise((resolve, reject) => {
-      exec(command, { timeout: 5000 }, (error, stdout, stderr) => {
+    const output = await new Promise((resolve, reject) => {
+      exec(dockerCommand.join(' '), { timeout: 5000 }, (error, stdout, stderr) => {
         if (error) {
-          reject({stderr, stdout});
+          reject(stderr || 'Execution failed');
         } else {
-          resolve();
+          resolve(stdout);
         }
       });
     });
 
-    const output = await fs.readFile(outputPath, 'utf-8');
     return res.status(200).json({ stdout: output });
 
   } catch (error) {
-    return res.status(500).json(error);
+    return res.status(500).json({ error });
 
   } finally {
-    // Delete temporary files
+    // Cleanup temporary files
     try {
       await fs.unlink(filePath);
-      if (language === 'c' || language === 'cpp') {
-        await fs.stat(`${filePath}.out`).then(() => fs.unlink(`${filePath}.out`)).catch(() => {});
-      }
-      if (language === 'java') {
-          await fs.stat(path.join(projectTmpDir, `${className}.class`)).then(() => fs.unlink(path.join(projectTmpDir, `${className}.class`))).catch(() => {});
-      }
       if (stdin) await fs.unlink(inputPath);
-      await fs.stat(outputPath).then(() => fs.unlink(outputPath)).catch(() => {});
     } catch (cleanupError) {
-      console.error("Error during cleanup:", cleanupError);
+      console.error('Error during cleanup:', cleanupError);
     }
   }
 }
