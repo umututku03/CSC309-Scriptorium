@@ -51,7 +51,9 @@ export default function Home() {
     <div
       className={`flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg`}
     >
-      <header className="text-4xl font-bold mb-8">Scriptorium</header>
+      <header className="text-4xl text-blue-900 font-bold mb-8 ">
+        Scriptorium
+      </header>
       <main className="flex flex-col gap-8 w-full max-w-4xl">
         <div className="flex gap-4 items-center flex-col sm:flex-row w-full">
           <select
@@ -91,7 +93,7 @@ export default function Home() {
           onChange={(e) => setStdin(e.target.value)}
         />
         <button
-          className="w-20 p-2 text-sm bg-blue-900 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+          className="self-end w-20 p-3 text-sm bg-blue-900 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
           onClick={runCode}
           disabled={loading}
         >
