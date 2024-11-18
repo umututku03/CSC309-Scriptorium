@@ -81,12 +81,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Unsupported language' });
   }
 
-  // Build Docker command
   const dockerCommand = [
-    'docker run --rm',
-    `-v ${projectTmpDir}:/sandbox`, // Mount tmp directory to /sandbox in the container
+    'docker run --rm', // Add -i to handle stdin
+    `-v ${projectTmpDir}:/sandbox`, // Mount the project directory to the container
     dockerImage,
-    language === 'java' ? 'TempJavaClass' : `temp_code.${extension}`, // Pass the file name
+    `/sandbox/${fileName}`, // Execute the file directly
   ];
 
   console.log(`Executing Docker command: ${dockerCommand.join(' ')}`);
@@ -95,7 +94,7 @@ export default async function handler(req, res) {
     const output = await new Promise((resolve, reject) => {
       exec(dockerCommand.join(' '), { timeout: 5000 }, (error, stdout, stderr) => {
         if (error) {
-          reject(stderr || 'Execution failed');
+          reject({ error: stderr || 'Execution failed', code: 422 });
         } else {
           resolve(stdout);
         }
@@ -105,8 +104,9 @@ export default async function handler(req, res) {
     return res.status(200).json({ stdout: output });
 
   } catch (error) {
-    return res.status(500).json({ error });
-
+    const statusCode = error.code || 500;
+    const message = error.error || 'Execution failed';
+    return res.status(statusCode).json({ error: message });
   } finally {
     // Cleanup temporary files
     try {

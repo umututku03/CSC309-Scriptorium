@@ -1,12 +1,22 @@
 #!/bin/bash
 # Entrypoint script for C
-gcc code.c -o code.out
+
+# Check if the source code exists
+if [ ! -f /sandbox/code.c ]; then
+    echo "Error: /sandbox/code.c not found."
+    exit 1
+fi
+
+# Compile the code
+gcc /sandbox/code.c -o /sandbox/code.out
 if [ $? -ne 0 ]; then
     echo "Compilation failed"
     exit 1
 fi
-if [ -f input.txt ]; then
-    ./code.out < input.txt
+
+# Check if input.txt exists
+if [ -f /sandbox/input.txt ]; then
+    /sandbox/code.out < /sandbox/input.txt
 else
-    ./code.out
+    /sandbox/code.out
 fi

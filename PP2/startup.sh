@@ -24,13 +24,6 @@ if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$DOCKER_VERSION" | sort -V | head -n1
 fi
 echo "Docker version is sufficient."
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
-  echo "Error: Docker Compose is not installed."
-  exit 1
-fi
-echo "Docker Compose is installed."
-
 # Install npm dependencies
 echo "Installing npm dependencies..."
 npm install
@@ -47,18 +40,11 @@ echo "Building Docker images for supported languages..."
 LANGUAGES=("python" "js" "c" "cpp" "java" "go" "rs" "rb" "php" "swift" "pl" "sh" "ts" "r")
 for lang in "${LANGUAGES[@]}"; do
   echo "Building Docker image for $lang..."
-  if ! docker build -t sandbox_$lang -f docker/Dockerfile.$lang .; then
+  if ! docker build -t "${lang}-executor" -f "docker/${lang}.Dockerfile" .; then
     echo "Error: Failed to build Docker image for $lang."
     exit 1
   fi
 done
 echo "All Docker images built successfully!"
-
-# Create an admin user in the database
-echo "Creating admin user..."
-if ! npx prisma db seed; then
-  echo "Error: Failed to seed database."
-  exit 1
-fi
 
 echo "Setup complete!"
