@@ -1134,7 +1134,7 @@
 			]
 		},
 		{
-			"name": "Code execution",
+			"name": "Code Execution API",
 			"item": [
 				{
 					"name": "General Scenarios",
@@ -1220,7 +1220,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\"code\": \"{{code}}\", \"language\": \"ruby\"}"
+									"raw": "{\"code\": \"{{code}}\", \"language\": \"unsupported_lang\"}"
 								},
 								"url": {
 									"raw": "{{base_url}}/execute",
@@ -1237,417 +1237,1169 @@
 					]
 				},
 				{
-					"name": "Python Tests",
+					"name": "Language Specific Tests",
 					"item": [
 						{
-							"name": "Basic Execution",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"print('Hello, world!')\", \"language\": \"py\"}"
+							"name": "Python Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"print('Hello, world!')\", \"language\": \"python\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"printf('Hello, world!')\", \"language\": \"python\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"input_str = input(); print(f'Received: {input_str}')\", \"language\": \"python\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "Basic Execution - Error",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"printf('Hello, world!')\", \"language\": \"py\"}"
+							"name": "JavaScript Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"console.log('Hello, world!')\", \"language\": \"javascript\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"consoles.log('Hello, world!')\", \"language\": \"javascript\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"process.stdin.on('data', (data) => { const input = data.toString().trim(); console.log(`Received: ${input}`); });\",\n    \"language\": \"javascript\",\n    \"stdin\": \"test_input\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "With Standard Input",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"input_str = input(); print(f'Received: {input_str}')\", \"language\": \"py\", \"stdin\": \"test_input\"}"
+							"name": "C Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <stdio.h>\\nint main() { printf(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "JavaScript Tests",
-					"item": [
-						{
-							"name": "Basic Execution",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"console.log('Hello, world!')\", \"language\": \"js\"}"
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <stdio.h>\\nint main() { print(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <stdio.h>\\nint main() { char input[50]; scanf(\\\"%s\\\", input); printf(\\\"Received: %s\\\", input); return 0; }\", \"language\": \"c\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "Basic Execution - Error",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"consoles.log('Hello, world!')\", \"language\": \"js\"}"
+							"name": "C++ Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <iostream>\\nint main() { std::cout << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <iostream>\\nint main() { std::csout << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"#include <iostream>\\nint main() { std::string input; std::cin >> input; std::cout << \\\"Received: \\\" << input << std::endl; return 0; }\", \"language\": \"cpp\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "With Standard Input",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"code\": \"process.stdin.on('data', (data) => { const input = data.toString().trim(); console.log(`Received: ${input}`); });\",\n    \"language\": \"js\",\n    \"stdin\": \"test_input\"\n}\n"
+							"name": "Java Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"public class TempJavaClass { public static void main(String[] args) { System.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); } }\",\n    \"language\": \"java\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "C Tests",
-					"item": [
-						{
-							"name": "Basic Execution",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { printf(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"public static void main(String[] args) { Systdem.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); }\",\n    \"language\": \"java\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"code\": \"import java.util.Scanner; public class TempJavaClass { public static void main(String[] args) { Scanner sc = new Scanner(System.in); String input = sc.nextLine(); System.out.println(\\\"Received: \\\" + input); } }\",\n    \"language\": \"java\",\n    \"stdin\": \"test_input\"\n}\n"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "Basic Execution - Error",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { print(\\\"Hello, world!\\\\n\\\"); return 0; }\", \"language\": \"c\"}"
+							"name": "Go Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"package main\\nimport \\\"fmt\\\"\\nfunc main() { fmt.Println(\\\"Hello, world!\\\") }\", \"language\": \"go\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"package main\\nimport \\\"fmt\\\"\\nfunc main() { fm.Println(\\\"Hello, world!\\\") }\", \"language\": \"go\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"package main\\nimport (\\\"fmt\\\"; \\\"bufio\\\"; \\\"os\\\")\\nfunc main() { reader := bufio.NewReader(os.Stdin)\\ninput, _ := reader.ReadString('\\n')\\nfmt.Printf(\\\"Received: %s\\\", input) }\", \"language\": \"go\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "With Standard Input",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <stdio.h>\\nint main() { char input[50]; scanf(\\\"%s\\\", input); printf(\\\"Received: %s\\\", input); return 0; }\", \"language\": \"c\", \"stdin\": \"test_input\"}"
+							"name": "Rust Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"fn main() { println!(\\\"Hello, world!\\\"); }\", \"language\": \"rust\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "C++ Tests",
-					"item": [
-						{
-							"name": "Basic Execution",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::codt << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"fn main() { prints!(\\\"Hello, world!\\\"); }\", \"language\": \"rust\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"use std::io;\\nfn main() { let mut input = String::new(); io::stdin().read_line(&mut input).expect(\\\"Failed to read line\\\"); println!(\\\"Received: {}\\\", input.trim()); }\", \"language\": \"rust\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "Basic Execution - Error",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::csout << \\\"Hello, world!\\\" << std::endl; return 0; }\", \"language\": \"cpp\"}"
+							"name": "Ruby Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"puts 'Hello, world!'\", \"language\": \"ruby\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"put 'Hello, world!'\", \"language\": \"ruby\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"input = gets.chomp\\\\nputs \\\"Received: \\\\#{input}\\\"\", \"language\": \"ruby\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "With Standard Input",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"code\": \"#include <iostream>\\nint main() { std::string input; std::cin >> input; std::cout << \\\"Received: \\\" << input << std::endl; return 0; }\", \"language\": \"cpp\", \"stdin\": \"test_input\"}"
+							"name": "PHP Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"<?php echo 'Hello, world!'; ?>\", \"language\": \"php\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Java Tests",
-					"item": [
-						{
-							"name": "Basic Execution",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"code\": \"public class TempJavaClass { public static void main(String[] args) { System.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); } }\",\n    \"language\": \"java\"\n}\n"
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"<?php echos 'Hello, world!'; ?>\", \"language\": \"php\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"<?php $input = trim(fgets(STDIN)); echo \\\"Received: $input\\\"; ?>\", \"language\": \"php\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "Basic Execution - Error",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"code\": \"public static void main(String[] args) { Systdem.out.println(\\\"Hello, world! This is standard output.\\\"); System.out.println(\\\"This is a simple Java test with no error or input handling.\\\"); }\",\n    \"language\": \"java\"\n}\n"
+							"name": "Swift Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"print(\\\"Hello, world!\\\")\", \"language\": \"swift\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"prin(\\\"Hello, world!\\\")\", \"language\": \"swift\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"import Foundation\\nlet input = readLine()!\\nprint(\\\"Received: \\\" + input)\", \"language\": \"swift\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "With Standard Input",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"code\": \"import java.util.Scanner; public class TempJavaClass { public static void main(String[] args) { Scanner sc = new Scanner(System.in); String input = sc.nextLine(); System.out.println(\\\"Received: \\\" + input); } }\",\n    \"language\": \"java\",\n    \"stdin\": \"test_input\"\n}\n"
+							"name": "Perl Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"print \\\"Hello, world!\\\";\", \"language\": \"perl\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{base_url}}/execute",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"execute"
-									]
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"prin \\\"Hello, world!\\\";\", \"language\": \"perl\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"my $input = <STDIN>; chomp($input); print \\\"Received: $input\\\";\", \"language\": \"perl\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
+						},
+						{
+							"name": "Shell Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"echo 'Hello, world!'\", \"language\": \"sh\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"ehco 'Hello, world!'\", \"language\": \"sh\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"read input\\necho \\\"Received: $input\\\"\", \"language\": \"sh\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "TypeScript Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"console.log('Hello, world!');\", \"language\": \"typescript\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"consoles.log('Hello, world!');\", \"language\": \"typescript\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"process.stdin.on('data', (data) => { const input = data.toString().trim(); console.log(`Received: ${input}`); });\", \"language\": \"typescript\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "R Tests",
+							"item": [
+								{
+									"name": "Basic Execution",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"cat('Hello, world!\\n')\", \"language\": \"r\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Basic Execution - Error",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"cats('Hello, world!\\n')\", \"language\": \"r\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "With Standard Input",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\"code\": \"input <- readline(prompt='Enter input: ')\\ncat(sprintf('Received: %s\\n', input))\", \"language\": \"r\", \"stdin\": \"test_input\"}"
+										},
+										"url": {
+											"raw": "{{base_url}}/execute",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"execute"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					]
 				}
