@@ -84,6 +84,71 @@ export default async function handler(req, res) {
             res.status(500).json({ error: err });
         }
     } 
+    else if (req.method === "GET") {
+        try {
+            var authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
+        } 
+        catch (err) {
+            return res.status(401).json({ error: err });
+        }
+        try {
+            const foundPost = await prisma.blogPost.findUnique({
+                where: { id: parseInt(id) },
+                include: {
+                    comments: {
+                        select: {
+                            id: true,
+                            content: true,
+                            upvotes: true,
+                            downvotes: true,
+                            user: {
+                                select: {
+                                    firstName: true,
+                                    lastName: true
+                                }
+                            },
+                            children: true,
+                            parentId: true
+                        }
+                    },
+                    ...(authUser?.role === 'ADMIN' && {
+                        reports: {
+                            select: {
+                                id: true
+                            }
+                        } 
+                    }),
+                    user: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            avatar: true
+                        }
+                    },
+                    templates: {
+                        select: {
+                            id: true,
+                            title: true
+                        }
+                    }
+                }
+                
+            });
+
+            if (!foundPost) {
+                return res.status(404).json({ message: "Blog post not found" });
+            }
+         
+            if (foundPost.isHidden === true && (authUser?.role !== "ADMIN" || authUser?.userId !== foundPost.userId)) {
+                return res.status(401).json({ message: "Unauthorized" });
+            }
+
+            res.status(200).json({ message: "Blog post retrieved successfully", blogPost: foundPost });
+        }
+        catch {
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
     else {
         res.status(405).json({ message: "Method not allowed" });
     }
