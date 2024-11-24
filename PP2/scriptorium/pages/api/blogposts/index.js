@@ -59,7 +59,7 @@ export default async function handler(req, res) {
         catch (err) {
             return res.status(401).json({ error: "Unauthorized "});
         }
-        const { id, title, tag, content, description, templateTitle, pageSize, sortOrder = "desc", page = 1 } = req.query;
+        const { id, title, tag, content, description, templateTitle, pageSize, sortBy, sortOrder = "desc", page = 1 } = req.query;
 
         let limit = 10;
         if (pageSize) {
@@ -67,6 +67,24 @@ export default async function handler(req, res) {
         }
         const skip = (page - 1) * limit;
         try {
+            let orderBy;
+            if (sortBy === "rating") {
+                orderBy = [
+                    {
+                        upvotes: sortOrder === "desc" ? "desc" : "asc",
+                    },
+                    {
+                        downvotes: sortOrder === "asc" ? "desc" : "asc",
+                    },
+                ]
+            }
+            else if (sortBy === "reports") {
+                orderBy = [
+                    {
+                        report_count: sortOrder
+                    }
+                ]
+            }
             const blogPosts = await prisma.blogPost.findMany({
                 where: {
                     id: id ? parseInt(id) : undefined,
@@ -113,14 +131,7 @@ export default async function handler(req, res) {
                         }
                     }
                 },
-                orderBy: [
-                    {
-                        upvotes: sortOrder === "desc" ? "desc" : "asc",
-                    },
-                    {
-                        downvotes: sortOrder === "asc" ? "desc" : "asc",
-                    },
-                ]
+                orderBy: orderBy
                 
                 
             });

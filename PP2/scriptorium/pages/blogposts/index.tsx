@@ -12,6 +12,7 @@ interface BlogPost {
   downvotes: number;
   templates: { id: number; title: string }[];
   user: { firstName: string; lastName: string; id: number };
+  report_count: number;
 }
 
 const BlogPostList: React.FC = () => {
@@ -31,6 +32,8 @@ const BlogPostList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<string>("desc"); // "asc", "desc", or null
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<string>("rating");
 
   const fetchBlogPosts = async () => {
     setLoading(true);
@@ -40,16 +43,20 @@ const BlogPostList: React.FC = () => {
 
     try {
       if (accessToken) {
+        const userResponse = await axios.get('/api/users/me', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        setIsAdmin(userResponse.data.role === 'ADMIN');
         var response = await axios.get(`/api/blogposts`, {
           headers: {
             Authorization: `Bearer ${accessToken}`
           },
-          params: { ...searchParams, page, pageSize: 12, sortOrder },
+          params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
         });
       }
       else {
         var response = await axios.get(`/api/blogposts`, {
-          params: { ...searchParams, page, pageSize: 12, sortOrder },
+          params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
         });
       }
 
@@ -63,11 +70,15 @@ const BlogPostList: React.FC = () => {
             accessToken = response.data.accessToken;
             if (accessToken) {
               localStorage.setItem("accessToken", accessToken);
+              const userResponse = await axios.get('/api/users/me', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+              });
+              setIsAdmin(userResponse.data.role === 'ADMIN');
               response = await axios.get(`/api/blogposts`, {
                 headers: {
                   Authorization: `Bearer ${accessToken}`
                 },
-                params: { ...searchParams, page, pageSize: 12, sortOrder },
+                params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
               });
               setBlogPosts(response.data.displayedPosts);
               setTotalPages(response.data.totalPages || 1);
@@ -76,7 +87,7 @@ const BlogPostList: React.FC = () => {
           catch (err: any) {
             try {
               response = await axios.get(`/api/blogposts`, {
-                params: { ...searchParams, page, pageSize: 12, sortOrder },
+                params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
               });
             } 
             catch (err: any) {
@@ -98,7 +109,7 @@ const BlogPostList: React.FC = () => {
 
   useEffect(() => {
     fetchBlogPosts();
-  }, [page, searchParams, sortOrder]);
+  }, [page, searchParams, sortOrder, sortBy]);
 
   const updateQueryParams = (params: any) => {
     router.push(
@@ -174,8 +185,10 @@ const BlogPostList: React.FC = () => {
     }
   };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOrder(e.target.value);
+  const handleSortTypeChange = (type: "rating" | "reports") => {
+    setSortBy(type);
+    // Reset sort order to desc when changing sort type
+    setSortOrder("desc");
   };
 
   
@@ -248,15 +261,49 @@ const BlogPostList: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Sort by Rating</label>
-              <select
-                value={sortOrder}
-                onChange={handleSortChange}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                <option value="desc">Highest Rated</option>
-                <option value="asc">Lowest Rated</option>
-              </select>
+              {isAdmin ? (
+                <div className="flex space-x-2">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium text-gray-700">Sort by</label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => handleSortTypeChange(e.target.value as "rating" | "reports")}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                      <option value="rating">Rating</option>
+                      <option value="reports">Reports</option>
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-sm font-medium text-gray-700">Order</label>
+                    <select
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    >
+                      <option value="desc">
+                        {sortBy === "reports" ? "Most Reported" : "Highest Rated"}
+                      </option>
+                      <option value="asc">
+                        {sortBy === "reports" ? "Least Reported" : "Lowest Rated"}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                // Non-admin sort control
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Sort by Rating</label>
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    <option value="desc">Highest Rated</option>
+                    <option value="asc">Lowest Rated</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -279,6 +326,11 @@ const BlogPostList: React.FC = () => {
         {blogPosts.map((post) => (
           <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div className="p-6">
+              {isAdmin && post.report_count > 0 && (
+                <div className="mb-2 inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                  🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
+                </div>
+              )}
               <Link href={`/blogposts/${post.id}`}>
                 <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
                   {post.title}
