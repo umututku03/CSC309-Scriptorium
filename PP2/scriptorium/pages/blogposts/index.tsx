@@ -13,6 +13,7 @@ interface BlogPost {
   templates: { id: number; title: string }[];
   user: { firstName: string; lastName: string; id: number };
   report_count: number;
+  isHidden: boolean;
 }
 
 const BlogPostList: React.FC = () => {
@@ -34,6 +35,37 @@ const BlogPostList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string>("desc"); // "asc", "desc", or null
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("rating");
+
+  const handleToggleHide = async (id: number, currentHiddenState: boolean) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("You need to be logged in");
+        return;
+      }
+      await axios.put(
+        `/api/blogposts/${id}`,
+        { isHidden: !currentHiddenState },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      // Update local state
+      setBlogPosts(prevPosts =>
+        prevPosts.map(post =>
+          post.id === id
+            ? { ...post, isHidden: !currentHiddenState }
+            : post
+        )
+      );
+    } catch (err: any) {
+      console.error("Failed to update post visibility:", err.response?.data?.error || err.message);
+      alert("Failed to update post visibility. Please try again.");
+    }
+  };
 
   const fetchBlogPosts = async () => {
     setLoading(true);
@@ -324,11 +356,23 @@ const BlogPostList: React.FC = () => {
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {blogPosts.map((post) => (
-          <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div 
+              key={post.id} 
+              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow`}
+            >
             <div className="p-6">
-              {isAdmin && post.report_count > 0 && (
-                <div className="mb-2 inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                  🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
+              {isAdmin && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {post.report_count > 0 && (
+                    <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                      🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  {post.isHidden && (
+                    <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                      🚫 Hidden
+                    </span>
+                  )}
                 </div>
               )}
               <Link href={`/blogposts/${post.id}`}>
@@ -365,6 +409,20 @@ const BlogPostList: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-2">
+                {isAdmin && (
+                  <div className="mt-4 flex items-center space-x-2">
+                    <button
+                      onClick={() => handleToggleHide(post.id, post.isHidden)}
+                      className={`inline-flex items-center px-3 py-1 rounded-md transition-colors
+                        ${post.isHidden 
+                          ? 'bg-green-50 text-green-700 hover:bg-green-100' 
+                          : 'bg-red-50 text-red-700 hover:bg-red-100'
+                        }`}
+                    >
+                      {post.isHidden ? '👁️ Unhide' : '🚫 Hide'} Post
+                    </button>
+                  </div>
+                )}
                 <button
                   onClick={() => handleVote(post.id, "UPVOTE")}
                   className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"

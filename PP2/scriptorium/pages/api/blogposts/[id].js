@@ -162,7 +162,7 @@ export default async function handler(req, res) {
                 return res.status(404).json({ message: "Blog post not found" });
             }
          
-            if (foundPost.isHidden === true && (authUser?.role !== "ADMIN" || authUser?.userId !== foundPost.userId)) {
+            if (foundPost.isHidden === true && authUser?.role !== "ADMIN" && authUser?.userId !== foundPost.userId) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
 
