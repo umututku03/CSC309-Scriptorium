@@ -6,10 +6,10 @@ import prisma from "@/lib/prisma";
 export default async function handler(req, res) {
   // POST API route for creating new inappropriate content report
     if (req.method === "POST") {
-        const authUser = verifyAuthorizationHeader(req.headers.authorization);
-
-        if (!authUser) {
-        return res.status(401).json({ error: "Unauthorized: Invalid token" });
+        try {
+            var authUser = verifyAuthorizationHeader(req.headers.authorization);
+        } catch (err) {
+            return res.status(401).json({ error: "Unauthorized" });
         }
 
         const { blogPostId, commentId, content } = req.body;
@@ -38,6 +38,17 @@ export default async function handler(req, res) {
                         error: "Blog post not found"
                     });
                 }
+
+                const reportExists = await prisma.report.findMany({
+                    where: {
+                        userId: authUser.userId,
+                        blogPostId
+                    }
+                });
+    
+                if (reportExists.length > 0) {
+                    return res.status(409).json({ error: "This post was already reported by the current user" });
+                }
             }
             else if (commentId) {
                 const commentExists = await prisma.comment.findUnique({
@@ -48,7 +59,20 @@ export default async function handler(req, res) {
                         error: "Comment not found"
                     });
                 }
+
+                const reportExists = await prisma.report.findMany({
+                    where: {
+                        userId: authUser.userId,
+                        commentId
+                    }
+                });
+    
+                if (reportExists.length > 0) {
+                    return res.status(409).json({ error: "This comment was already reported by the current user" });
+                }
+    
             }
+
             const report = await prisma.report.create({
                 data: {
                 content,
@@ -81,7 +105,12 @@ export default async function handler(req, res) {
             res.status(500).json({ error: "Failed to create report" });
         }
     } else if (req.method === "GET") {
-        const authUser = verifyAuthorizationHeader(req.headers.authorization);
+        try {
+            var authUser = verifyAuthorizationHeader(req.headers.authorization);
+        }
+        catch (err) {
+            return res.status(401).json( { error: "Unauthorized" });
+        }
         if (!authUser || !authUser.role === "ADMIN") {
         return res.status(401).json({ error: "Unauthorized" });
         }
