@@ -11,6 +11,7 @@ interface Comment {
   user: { firstName: string, lastName: string, id: number };
   children: Comment[];
   parentId: number | null;
+  report_count: number;
 }
 
 interface BlogPost {
@@ -88,11 +89,10 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmit, ty
   );
 };
 
-// Move this outside and above BlogPostDetail
 interface CommentComponentProps {
   comment: Comment;
   onVote: (commentId: number, votetype: string) => Promise<void>;
-  onReport: (commentId: number) => void; // Remove Promise<void>
+  onReport: (commentId: number) => void;
   onReply: (commentId: number) => void;
   onCancelReply: () => void;
   onPostReply: (parentId: number) => Promise<void>;
@@ -101,6 +101,7 @@ interface CommentComponentProps {
   onReplyContentChange: (content: string) => void;
   expandedComments: Set<number>;
   onToggleReplies: (commentId: number) => void;
+  isAdmin: boolean; // Add this
 }
 
 const CommentComponent: React.FC<CommentComponentProps> = ({
@@ -115,6 +116,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
   onReplyContentChange,
   expandedComments,
   onToggleReplies,
+  isAdmin,
 }) => (
   <div className="bg-gray-50 rounded-lg p-4">
     {/* User Info */}
@@ -129,6 +131,11 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
           </p>
         </Link>
       </div>
+      {isAdmin && comment.report_count > 0 && (
+        <div className="ml-4 px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+          🚩 {comment.report_count} report{comment.report_count !== 1 ? 's' : ''}
+        </div>
+      )}
     </div>
     
     {/* Comment Content */}
@@ -215,6 +222,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
                 onReplyContentChange={onReplyContentChange}
                 expandedComments={expandedComments}
                 onToggleReplies={onToggleReplies}
+                isAdmin={isAdmin}
               />
             ))}
           </div>
@@ -239,6 +247,8 @@ const BlogPostDetail: React.FC = () => {
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyContent, setReplyContent] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const [sortBy, setSortBy] = useState<string>("rating");
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
 
@@ -343,7 +353,8 @@ const BlogPostDetail: React.FC = () => {
               Authorization: `Bearer ${accessToken}`,
             },
             params: {
-              sortOrder
+              sortOrder,
+              sortBy
             }
           }
         );
@@ -353,6 +364,7 @@ const BlogPostDetail: React.FC = () => {
           },
         });
         setCurrentUserId(currentUser.data.id);
+        setIsAdmin(currentUser.data.role === 'ADMIN');
       }
       else {
         var response = await axios.get(`/api/blogposts/${id}`, {
@@ -379,7 +391,8 @@ const BlogPostDetail: React.FC = () => {
                     Authorization: `Bearer ${accessToken}`,
                   },
                   params: {
-                    sortOrder
+                    sortOrder,
+                    sortBy
                   }
                 }
               );
@@ -393,13 +406,15 @@ const BlogPostDetail: React.FC = () => {
                 },
               });
               setCurrentUserId(currentUser.data.id);
+              setIsAdmin(currentUser.data.role === 'ADMIN');
             }
           }
           catch (err: any) {
             try {
               response = await axios.get(`/api/blogposts/${id}`, {
                 params: {
-                  sortOrder
+                  sortOrder,
+                  sortBy
                 }
               });
               let blogPostData = response.data.blogPost;
@@ -662,7 +677,7 @@ const BlogPostDetail: React.FC = () => {
     if (id) {
       fetchBlogPost();
     }
-  }, [id, sortOrder]);
+  }, [id, sortOrder, sortBy]);
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
@@ -801,8 +816,24 @@ const BlogPostDetail: React.FC = () => {
         <h2 className="text-xl text-black font-bold mb-6">Comments</h2>
 
         <div className="flex items-center">
+        {isAdmin && (
+            <div className="flex items-center">
+              <label htmlFor="sortBy" className="mr-2 text-gray-600">
+                Sort by:
+              </label>
+              <select
+                id="sortBy"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "rating" | "reports")}
+                className="border border-gray-300 rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="rating">Rating</option>
+                <option value="reports">Report Count</option>
+              </select>
+            </div>
+          )}
             <label htmlFor="sortOrder" className="mr-2 text-gray-600">
-              Sort by rating:
+              Sort by:
             </label>
             <select
               id="sortOrder"
@@ -810,8 +841,12 @@ const BlogPostDetail: React.FC = () => {
               onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
               className="border border-gray-300 rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="desc">Highest first</option>
-              <option value="asc">Lowest first</option>
+              <option value="desc">
+                {sortBy === "reports" ? "Most reported first" : "Highest rating"}
+              </option>
+              <option value="asc">
+                {sortBy === "reports" ? "Least reported first" : "Lowest rating"}
+              </option>
             </select>
           </div>
         
@@ -851,6 +886,7 @@ const BlogPostDetail: React.FC = () => {
                   onReplyContentChange={(content) => setReplyContent(content)}
                   expandedComments={expandedComments}
                   onToggleReplies={toggleReplies}
+                  isAdmin={isAdmin}
                 />
               ))}
             </div>

@@ -26,6 +26,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             firstName: true,
             lastName: true,
             email: true,
+            avatar: true,
+            phone: true,
+            role: true
         },
         });
 

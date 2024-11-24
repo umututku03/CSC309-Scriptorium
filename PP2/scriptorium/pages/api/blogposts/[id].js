@@ -85,7 +85,7 @@ export default async function handler(req, res) {
         }
     } 
     else if (req.method === "GET") {
-        const { sortOrder="desc" } = req.query;
+        const { sortOrder="desc", sortBy} = req.query;
         try {
             var authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
         } 
@@ -93,6 +93,24 @@ export default async function handler(req, res) {
             return res.status(401).json({ error: err });
         }
         try {
+            let orderBy;
+            if (sortBy === "rating"){
+                orderBy =  [
+                    {
+                        upvotes: sortOrder === "desc" ? "desc" : "asc",
+                    },
+                    {
+                        downvotes: sortOrder === "asc" ? "desc" : "asc",
+                    },
+                ]
+            }
+            else if (sortBy === "reports") {
+                orderBy = [
+                    {
+                        report_count: sortOrder
+                    }
+                ]
+            }
             const foundPost = await prisma.blogPost.findUnique({
                 where: { id: parseInt(id) },
                 include: {
@@ -110,16 +128,10 @@ export default async function handler(req, res) {
                                 }
                             },
                             children: true,
-                            parentId: true
+                            parentId: true,
+                            report_count: true
                         },
-                        orderBy: [
-                            {
-                                upvotes: sortOrder === "desc" ? "desc" : "asc",
-                            },
-                            {
-                                downvotes: sortOrder === "asc" ? "desc" : "asc",
-                            },
-                        ]
+                        orderBy: orderBy
                     },
                     ...(authUser?.role === 'ADMIN' && {
                         reports: {
