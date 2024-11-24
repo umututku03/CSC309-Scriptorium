@@ -85,6 +85,7 @@ export default async function handler(req, res) {
         }
     } 
     else if (req.method === "GET") {
+        const { sortOrder="desc" } = req.query;
         try {
             var authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
         } 
@@ -104,12 +105,21 @@ export default async function handler(req, res) {
                             user: {
                                 select: {
                                     firstName: true,
-                                    lastName: true
+                                    lastName: true,
+                                    id: true
                                 }
                             },
                             children: true,
                             parentId: true
-                        }
+                        },
+                        orderBy: [
+                            {
+                                upvotes: sortOrder === "desc" ? "desc" : "asc",
+                            },
+                            {
+                                downvotes: sortOrder === "asc" ? "desc" : "asc",
+                            },
+                        ]
                     },
                     ...(authUser?.role === 'ADMIN' && {
                         reports: {
@@ -120,6 +130,7 @@ export default async function handler(req, res) {
                     }),
                     user: {
                         select: {
+                            id: true,
                             firstName: true,
                             lastName: true,
                             avatar: true

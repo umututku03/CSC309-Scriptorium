@@ -53,8 +53,13 @@ export default async function handler(req, res) {
     }
     // GET API route for searching blog posts by id, title, tag, content, or referenced code templates
     else if (req.method === "GET") {
-        const authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
-        const { id, title, tag, content, templateIds, pageSize, page = 1 } = req.query;
+        try {
+            var authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
+        }
+        catch (err) {
+            return res.status(401).json({ error: "Unauthorized "});
+        }
+        const { id, title, tag, content, description, templateTitle, pageSize, sortOrder = "desc", page = 1 } = req.query;
 
         let limit = 10;
         if (pageSize) {
@@ -68,16 +73,18 @@ export default async function handler(req, res) {
                     title: title ? { contains: title } : undefined,
                     tag: tag ? { contains: tag } : undefined,
                     content: content ? { contains: content } : undefined,
-                    templates: templateIds ? {
+                    description: description ? { contains: description } : undefined,
+                    templates: templateTitle
+                    ? {
                         some: {
-                            id: {
-                                in: templateIds.split(",").map(templateId => parseInt(templateId))
-                            }
-                        }
-                    } : undefined,
+                            title: {
+                                contains: templateTitle,
+                                mode: "insensitive",
+                            },
+                        },
+                    }
+                    : undefined,
                 },
-                skip: skip,
-                take: limit,
                 include: {
                     comments: {
                         select: {
@@ -93,6 +100,7 @@ export default async function handler(req, res) {
                     }),
                     user: {
                         select: {
+                            id: true,
                             firstName: true,
                             lastName: true,
                             avatar: true
@@ -100,10 +108,20 @@ export default async function handler(req, res) {
                     },
                     templates: {
                         select: {
-                            id: true
+                            id: true,
+                            title: true
                         }
                     }
-                }
+                },
+                orderBy: [
+                    {
+                        upvotes: sortOrder === "desc" ? "desc" : "asc",
+                    },
+                    {
+                        downvotes: sortOrder === "asc" ? "desc" : "asc",
+                    },
+                ]
+                
                 
             });
 
@@ -114,7 +132,9 @@ export default async function handler(req, res) {
                 return res.status(404).json({ message: "No blog posts found" });
             }
 
-            res.status(200).json({ message: "Blog posts retrieved successfully", filteredPosts });
+            const displayedPosts = filteredPosts.slice(skip, skip + limit)
+
+            res.status(200).json({ message: "Blog posts retrieved successfully", displayedPosts, totalPages: Math.ceil(filteredPosts.length / limit) });
         }
         catch {
             res.status(500).json({ error: "Internal Server Error" });
