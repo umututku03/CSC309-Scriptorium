@@ -25,12 +25,74 @@ interface BlogPost {
   comments: Comment[];
 }
 
+// Add this interface near the top with other interfaces
+interface ReportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (content: string) => Promise<void>;
+  type: 'post' | 'comment';
+}
+
+const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmit, type }) => {
+  const [reportContent, setReportContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!reportContent.trim()) {
+      alert('Please provide a reason for your report');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(reportContent);
+      setReportContent('');
+      onClose();
+    } catch (error) {
+      console.error('Failed to submit report:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 className="text-lg font-semibold mb-4">Report {type}</h3>
+        <textarea
+          value={reportContent}
+          onChange={(e) => setReportContent(e.target.value)}
+          placeholder="Please describe why you're reporting this content..."
+          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px] mb-4"
+        />
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Report'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Move this outside and above BlogPostDetail
 interface CommentComponentProps {
   comment: Comment;
   onVote: (commentId: number, votetype: string) => Promise<void>;
-  onReport: (commentId: number) => Promise<void>;
+  onReport: (commentId: number) => void; // Remove Promise<void>
   onReply: (commentId: number) => void;
   onCancelReply: () => void;
   onPostReply: (parentId: number) => Promise<void>;
@@ -177,6 +239,76 @@ const BlogPostDetail: React.FC = () => {
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyContent, setReplyContent] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
+
+  const handleReport = async (content: string) => {
+    if (!blogPost) return;
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("You need to log in to report content.");
+        return;
+      }
+      console.log(content);
+
+      await axios.post(
+        `/api/reports`,
+        { 
+          blogPostId: blogPost.id, 
+          content: content 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Thank you for your report. We will review it shortly.");
+    } catch (err: any) {
+      if (err.status === 409) {
+        alert("You have already reported this post");
+      }
+      console.error("Failed to report the post:", err.response?.data?.error || err.message);
+      throw err;
+    }
+  };
+
+  const handleCommentReport = async (commentId: number, content: string) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("You need to log in to report content");
+        return;
+      }
+
+      await axios.post(
+        `/api/reports`,
+        { commentId, content },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Thank you for your report. We will review it shortly.");
+    } catch (err: any) {
+      if (err.status === 409) {
+        alert("You have already reported this comment");
+      }
+      console.error("Failed to report the comment:", err.response?.data?.error || err.message);
+      throw err;
+    }
+  };
+
+  // Modify the CommentComponent props to include new reporting function
+  const handleCommentReportClick = (commentId: number) => {
+    setReportingCommentId(commentId);
+    setShowReportModal(true);
+  };
 
 
   const processComments = (blogPostData: BlogPost) => {
@@ -328,32 +460,6 @@ const BlogPostDetail: React.FC = () => {
       }
     } catch (err: any) {
       console.error("Failed to rate the post:", err.response?.data?.error || err.message);
-    }
-  };
-
-  const handleReport = async () => {
-    if (!blogPost) return;
-
-    try {
-      const token = localStorage.getItem("accessToken"); // Or wherever you store the token
-      if (!token) {
-        alert("You need to log in to report content.");
-        return;
-      }
-
-      await axios.post(
-        `/api/reports`,
-        { blogPostId: blogPost.id, content: "Reported as inappropriate." },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      alert("The post has been reported. Thank you for your feedback!");
-    } catch (err: any) {
-      console.error("Failed to report the post:", err.response?.data?.error || err.message);
     }
   };
 
@@ -552,31 +658,6 @@ const BlogPostDetail: React.FC = () => {
     }
   };
   
-  const handleCommentReport = async (commentId: number) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        alert("You need to log in to report content");
-        return;
-      }
-  
-      await axios.post(
-        `/api/reports`,
-        { commentId, content: "Reported as inappropriate." },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-  
-      alert("The comment has been reported. Thank you for your feedback!");
-    } catch (err: any) {
-      console.error("Failed to report the comment:", err.response?.data?.error || err.message);
-    }
-  };
-
-
   useEffect(() => {
     if (id) {
       fetchBlogPost();
@@ -675,6 +756,22 @@ const BlogPostDetail: React.FC = () => {
             </div>
           )}
 
+          <ReportModal
+              isOpen={showReportModal}
+              onClose={() => {
+                setShowReportModal(false);
+                setReportingCommentId(null);
+              }}
+              onSubmit={async (content) => {
+                if (reportingCommentId) {
+                  await handleCommentReport(reportingCommentId, content);
+                } else {
+                  await handleReport(content);
+                }
+              }}
+              type={reportingCommentId ? 'comment' : 'post'}
+            />
+
           {/* Interaction Buttons */}
           <div className="flex items-center space-x-4 mt-6 pt-6 border-t">
             <button
@@ -690,7 +787,7 @@ const BlogPostDetail: React.FC = () => {
               👎 {blogPost.downvotes}
             </button>
             <button
-              onClick={handleReport}
+              onClick={() => setShowReportModal(true)}
               className="inline-flex items-center px-4 py-2 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
             >
               🚩 Report
@@ -742,7 +839,7 @@ const BlogPostDetail: React.FC = () => {
                   key={comment.id}
                   comment={comment}
                   onVote={handleCommentVote}
-                  onReport={handleCommentReport}
+                  onReport={handleCommentReportClick}
                   onReply={setReplyingTo}
                   onCancelReply={() => {
                     setReplyingTo(null);

@@ -75,10 +75,10 @@ export default async function handler(req, res) {
 
             const report = await prisma.report.create({
                 data: {
-                content,
-                blogPostId,
-                commentId,
-                userId: authUser.userId // Assuming user ID is available in the request
+                    content,
+                    blogPostId,
+                    commentId,
+                    userId: authUser.userId 
                 },
             });
 
