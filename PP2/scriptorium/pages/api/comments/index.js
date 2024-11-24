@@ -38,7 +38,9 @@ export default async function handler(req, res) {
                     connect: { id: blogPostId },
                 },
                 user: {
-                    connect: { id: authUser.userId },
+                    connect: { 
+                        id: authUser.userId
+                    }
                 },
                 ...(parentId && {
                     parent: {
@@ -47,7 +49,18 @@ export default async function handler(req, res) {
                 })
             };
 
-            const newComment = await prisma.comment.create({ data: newCommentData });
+            const newComment = await prisma.comment.create({ 
+                data: newCommentData,
+                include: {
+                    user: {
+                        select: {
+                            firstName: true,
+                            lastName: true,
+                            id: true
+                        }
+                    }
+                }  
+            });
             return res.status(201).json({ message: 'Comment created successfully', newComment });
         } else if (req.method === "GET") {
             const authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
