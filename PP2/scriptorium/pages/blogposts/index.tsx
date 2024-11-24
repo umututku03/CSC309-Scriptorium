@@ -35,6 +35,8 @@ const BlogPostList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string>("desc"); // "asc", "desc", or null
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("rating");
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
 
   const handleToggleHide = async (id: number, currentHiddenState: boolean) => {
     try {
@@ -79,6 +81,7 @@ const BlogPostList: React.FC = () => {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         setIsAdmin(userResponse.data.role === 'ADMIN');
+        setCurrentUserId(userResponse.data.id); 
         var response = await axios.get(`/api/blogposts`, {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -106,6 +109,7 @@ const BlogPostList: React.FC = () => {
                 headers: { Authorization: `Bearer ${accessToken}` }
               });
               setIsAdmin(userResponse.data.role === 'ADMIN');
+              setCurrentUserId(userResponse.data.id); 
               response = await axios.get(`/api/blogposts`, {
                 headers: {
                   Authorization: `Bearer ${accessToken}`
@@ -355,26 +359,29 @@ const BlogPostList: React.FC = () => {
 
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {blogPosts.map((post) => (
+        {blogPosts.map((post) => {
+            const isAuthor = currentUserId === post.user.id;
+            const shouldShow = !post.isHidden || isAdmin || isAuthor;
+            return shouldShow && (
             <div 
               key={post.id} 
               className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow`}
             >
             <div className="p-6">
-              {isAdmin && (
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {post.report_count > 0 && (
-                    <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                      🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                  {post.isHidden && (
-                    <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                      🚫 Hidden
-                    </span>
-                  )}
-                </div>
-              )}
+                {(isAdmin || (isAuthor && post.isHidden)) && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {isAdmin && post.report_count > 0 && (
+                      <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                        🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {post.isHidden && (
+                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                        🚫 Hidden
+                      </span>
+                    )}
+                  </div>
+                )}
               <Link href={`/blogposts/${post.id}`}>
                 <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
                   {post.title}
@@ -438,7 +445,7 @@ const BlogPostList: React.FC = () => {
               </div>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Pagination */}

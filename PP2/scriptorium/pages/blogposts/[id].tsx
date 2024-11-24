@@ -25,6 +25,7 @@ interface BlogPost {
   templates: { id: number; title: string }[];
   user: { firstName: string; lastName: string, id: number };
   comments: Comment[];
+  isHidden: boolean;
 }
 
 // Add this interface near the top with other interfaces
@@ -104,6 +105,7 @@ interface CommentComponentProps {
   onToggleReplies: (commentId: number) => void;
   onToggleHide: (commentId: number, currentHiddenState: boolean) => Promise<void>;
   isAdmin: boolean;
+  currentUserId: number | null;
 }
 
 const CommentComponent: React.FC<CommentComponentProps> = ({
@@ -120,143 +122,147 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
   onToggleReplies,
   onToggleHide,
   isAdmin,
-}) => (
-  <div className="bg-gray-50 rounded-lg p-4">
-    {/* User Info */}
-    <div className="flex text-gray-500 items-center mb-2">
-      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-        {comment.user.firstName[0]}
-      </div>
-      <div className="ml-2">
-        <Link href={`/users/${comment.user.id}`}>
-          <p className="font-medium hover:underline cursor-pointer">
-            {comment.user.firstName} {comment.user.lastName}
-          </p>
-        </Link>
-      </div>
-      {isAdmin && (
+  currentUserId,
+}) => {
+  const isAuthor = currentUserId === comment.user.id;
+  const shouldShow = !comment.isHidden || isAdmin || isAuthor;
+  return (
+    <div className="bg-gray-50 rounded-lg p-4">
+      {/* User Info */}
+      <div className="flex text-gray-500 items-center mb-2">
+        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
+          {comment.user.firstName[0]}
+        </div>
+        <div className="ml-2">
+          <Link href={`/users/${comment.user.id}`}>
+            <p className="font-medium hover:underline cursor-pointer">
+              {comment.user.firstName} {comment.user.lastName}
+            </p>
+          </Link>
+        </div>
         <div className="flex items-center space-x-2 ml-4">
-          {comment.report_count > 0 && (
+          {isAdmin && comment.report_count > 0 && (
             <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
               🚩 {comment.report_count} report{comment.report_count !== 1 ? 's' : ''}
             </span>
           )}
-          {comment.isHidden && (
+          {comment.isHidden && (isAdmin || isAuthor) && (
             <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
               🚫 Hidden
             </span>
           )}
         </div>
-      )}
-    </div>
-    
-    {/* Comment Content */}
-    <p className="text-gray-700 ml-10 mb-3">{comment.content}</p>
-    
-    {/* Comment Actions */}
-    <div className="ml-10 space-x-3 mb-3">
-
-      {isAdmin && (
-        <button
-          onClick={() => onToggleHide(comment.id, comment.isHidden)}
-          className={`inline-flex items-center px-2 py-1 rounded transition-colors text-sm
-            ${comment.isHidden 
-              ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-              : 'bg-red-50 text-red-700 hover:bg-red-100'
-            }`}
-        >
-          {comment.isHidden ? '👁️ Unhide' : '🚫 Hide'}
-        </button>
-      )}
-      <button
-        onClick={() => onVote(comment.id, "UPVOTE")}
-        className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm"
-      >
-        👍 {comment.upvotes}
-      </button>
-      <button
-        onClick={() => onVote(comment.id, "DOWNVOTE")}
-        className="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors text-sm"
-      >
-        👎 {comment.downvotes}
-      </button>
-      <button
-        onClick={() => onReport(comment.id)}
-        className="inline-flex items-center px-2 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition-colors text-sm"
-      >
-        🚩 Report
-      </button>
-      <button
-        onClick={() => onReply(comment.id)}
-        className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors text-sm"
-      >
-        ↩️ Reply
-      </button>
-    </div>
-
-    {/* Reply Form */}
-    {replyingTo === comment.id && (
-      <div className="ml-10 mt-3">
-        <textarea
-          value={replyContent}
-          onChange={(e) => onReplyContentChange(e.target.value)}
-          placeholder="Write your reply..."
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-          rows={3}
-        />
-        <div className="mt-2 space-x-2">
-          <button
-            onClick={() => onPostReply(comment.id)}
-            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-          >
-            Post Reply
-          </button>
-          <button
-            onClick={onCancelReply}
-            className="px-3 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 text-sm"
-          >
-            Cancel
-          </button>
-        </div>
       </div>
-    )}
+      
+      {/* Comment Content */}
+      <p className="text-gray-700 ml-10 mb-3">{comment.content}</p>
+      
+      {/* Comment Actions */}
+      <div className="ml-10 space-x-3 mb-3">
 
-    {/* Nested Replies */}
-    {comment.children.length > 0 && (
-      <div className="ml-10">
-        <button
-          onClick={() => onToggleReplies(comment.id)}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-        >
-          {expandedComments.has(comment.id) ? "▼" : "▶"} {comment.children.length} { comment.children.length > 1 ? "Replies" : "Reply" }
-        </button>
-        
-        {expandedComments.has(comment.id) && (
-          <div className="mt-3 pl-4 border-l-2 border-gray-200 space-y-3">
-            {comment.children.map((reply) => (
-              <CommentComponent
-                key={reply.id}
-                comment={reply}
-                onVote={onVote}
-                onReport={onReport}
-                onReply={onReply}
-                onCancelReply={onCancelReply}
-                onPostReply={onPostReply}
-                replyingTo={replyingTo}
-                replyContent={replyContent}
-                onReplyContentChange={onReplyContentChange}
-                expandedComments={expandedComments}
-                onToggleReplies={onToggleReplies}
-                onToggleHide={onToggleHide}
-                isAdmin={isAdmin}
-              />
-            ))}
-          </div>
+        {isAdmin && (
+          <button
+            onClick={() => onToggleHide(comment.id, comment.isHidden)}
+            className={`inline-flex items-center px-2 py-1 rounded transition-colors text-sm
+              ${comment.isHidden 
+                ? 'bg-green-50 text-green-700 hover:bg-green-100' 
+                : 'bg-red-50 text-red-700 hover:bg-red-100'
+              }`}
+          >
+            {comment.isHidden ? '👁️ Unhide' : '🚫 Hide'}
+          </button>
         )}
+        <button
+          onClick={() => onVote(comment.id, "UPVOTE")}
+          className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm"
+        >
+          👍 {comment.upvotes}
+        </button>
+        <button
+          onClick={() => onVote(comment.id, "DOWNVOTE")}
+          className="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors text-sm"
+        >
+          👎 {comment.downvotes}
+        </button>
+        <button
+          onClick={() => onReport(comment.id)}
+          className="inline-flex items-center px-2 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition-colors text-sm"
+        >
+          🚩 Report
+        </button>
+        <button
+          onClick={() => onReply(comment.id)}
+          className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors text-sm"
+        >
+          ↩️ Reply
+        </button>
       </div>
-    )}
-  </div>
-);
+
+      {/* Reply Form */}
+      {replyingTo === comment.id && (
+        <div className="ml-10 mt-3">
+          <textarea
+            value={replyContent}
+            onChange={(e) => onReplyContentChange(e.target.value)}
+            placeholder="Write your reply..."
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+            rows={3}
+          />
+          <div className="mt-2 space-x-2">
+            <button
+              onClick={() => onPostReply(comment.id)}
+              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            >
+              Post Reply
+            </button>
+            <button
+              onClick={onCancelReply}
+              className="px-3 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Nested Replies */}
+      {comment.children.length > 0 && shouldShow && (
+        <div className="ml-10">
+          <button
+            onClick={() => onToggleReplies(comment.id)}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          >
+            {expandedComments.has(comment.id) ? "▼" : "▶"} {comment.children.length} { comment.children.length > 1 ? "Replies" : "Reply" }
+          </button>
+          
+          {expandedComments.has(comment.id) && (
+            <div className="mt-3 pl-4 border-l-2 border-gray-200 space-y-3">
+              {comment.children.map((reply) => (
+                <CommentComponent
+                  key={reply.id}
+                  comment={reply}
+                  onVote={onVote}
+                  onReport={onReport}
+                  onReply={onReply}
+                  onCancelReply={onCancelReply}
+                  onPostReply={onPostReply}
+                  replyingTo={replyingTo}
+                  replyContent={replyContent}
+                  onReplyContentChange={onReplyContentChange}
+                  expandedComments={expandedComments}
+                  onToggleReplies={onToggleReplies}
+                  onToggleHide={onToggleHide}
+                  isAdmin={isAdmin}
+                  currentUserId={currentUserId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 
@@ -804,7 +810,7 @@ const BlogPostDetail: React.FC = () => {
               </div>
             </div>
             
-            {isOwner && (
+            {isOwner && !blogPost.isHidden && (
               <div className="flex space-x-2">
                 <button 
                   onClick={() => router.push(`/blogposts/edit/${id}`)}
@@ -962,6 +968,7 @@ const BlogPostDetail: React.FC = () => {
                 expandedComments={expandedComments}
                 onToggleReplies={toggleReplies}
                 isAdmin={isAdmin}
+                currentUserId={currentUserId}
               />
               ))}
             </div>
