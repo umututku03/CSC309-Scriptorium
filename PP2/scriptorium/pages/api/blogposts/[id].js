@@ -129,7 +129,8 @@ export default async function handler(req, res) {
                             },
                             children: true,
                             parentId: true,
-                            report_count: true
+                            report_count: true,
+                            isHidden: true
                         },
                         orderBy: orderBy
                     },

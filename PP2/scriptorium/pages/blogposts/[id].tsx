@@ -12,6 +12,7 @@ interface Comment {
   children: Comment[];
   parentId: number | null;
   report_count: number;
+  isHidden: boolean;
 }
 
 interface BlogPost {
@@ -101,7 +102,8 @@ interface CommentComponentProps {
   onReplyContentChange: (content: string) => void;
   expandedComments: Set<number>;
   onToggleReplies: (commentId: number) => void;
-  isAdmin: boolean; // Add this
+  onToggleHide: (commentId: number, currentHiddenState: boolean) => Promise<void>;
+  isAdmin: boolean;
 }
 
 const CommentComponent: React.FC<CommentComponentProps> = ({
@@ -116,6 +118,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
   onReplyContentChange,
   expandedComments,
   onToggleReplies,
+  onToggleHide,
   isAdmin,
 }) => (
   <div className="bg-gray-50 rounded-lg p-4">
@@ -131,9 +134,18 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
           </p>
         </Link>
       </div>
-      {isAdmin && comment.report_count > 0 && (
-        <div className="ml-4 px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-          🚩 {comment.report_count} report{comment.report_count !== 1 ? 's' : ''}
+      {isAdmin && (
+        <div className="flex items-center space-x-2 ml-4">
+          {comment.report_count > 0 && (
+            <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+              🚩 {comment.report_count} report{comment.report_count !== 1 ? 's' : ''}
+            </span>
+          )}
+          {comment.isHidden && (
+            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+              🚫 Hidden
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -143,6 +155,19 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
     
     {/* Comment Actions */}
     <div className="ml-10 space-x-3 mb-3">
+
+      {isAdmin && (
+        <button
+          onClick={() => onToggleHide(comment.id, comment.isHidden)}
+          className={`inline-flex items-center px-2 py-1 rounded transition-colors text-sm
+            ${comment.isHidden 
+              ? 'bg-green-50 text-green-700 hover:bg-green-100' 
+              : 'bg-red-50 text-red-700 hover:bg-red-100'
+            }`}
+        >
+          {comment.isHidden ? '👁️ Unhide' : '🚫 Hide'}
+        </button>
+      )}
       <button
         onClick={() => onVote(comment.id, "UPVOTE")}
         className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm"
@@ -222,6 +247,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
                 onReplyContentChange={onReplyContentChange}
                 expandedComments={expandedComments}
                 onToggleReplies={onToggleReplies}
+                onToggleHide={onToggleHide}
                 isAdmin={isAdmin}
               />
             ))}
@@ -672,6 +698,54 @@ const BlogPostDetail: React.FC = () => {
       console.error("Failed to rate the comment:", err.response?.data?.error || err.message);
     }
   };
+
+  const handleCommentToggleHide = async (commentId: number, currentHiddenState: boolean) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("You need to be logged in");
+        return;
+      }
+  
+      const response = await axios.put(
+        `/api/comments/${commentId}`,
+        { isHidden: !currentHiddenState },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response)
+  
+      setBlogPost((prevBlogPost) => {
+        if (!prevBlogPost) return null;
+  
+        const updateCommentVisibility = (comments: Comment[]): Comment[] => {
+          return comments.map(comment => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                isHidden: !currentHiddenState
+              };
+            }
+            return {
+              ...comment,
+              children: updateCommentVisibility(comment.children)
+            };
+          });
+        };
+  
+        return {
+          ...prevBlogPost,
+          comments: updateCommentVisibility(prevBlogPost.comments)
+        };
+      });
+    } catch (err: any) {
+      console.error("Failed to update comment visibility:", err.response?.data?.error || err.message);
+      alert("Failed to update comment visibility. Please try again.");
+    }
+  };
   
   useEffect(() => {
     if (id) {
@@ -871,23 +945,24 @@ const BlogPostDetail: React.FC = () => {
             <div className="space-y-6">
               {blogPost.comments.filter(comment => comment.parentId === null).map((comment) => (
                 <CommentComponent
-                  key={comment.id}
-                  comment={comment}
-                  onVote={handleCommentVote}
-                  onReport={handleCommentReportClick}
-                  onReply={setReplyingTo}
-                  onCancelReply={() => {
-                    setReplyingTo(null);
-                    setReplyContent("");
-                  }}
-                  onPostReply={postReply}
-                  replyingTo={replyingTo}
-                  replyContent={replyContent}
-                  onReplyContentChange={(content) => setReplyContent(content)}
-                  expandedComments={expandedComments}
-                  onToggleReplies={toggleReplies}
-                  isAdmin={isAdmin}
-                />
+                key={comment.id}
+                comment={comment}
+                onVote={handleCommentVote}
+                onReport={handleCommentReportClick}
+                onToggleHide={handleCommentToggleHide} // Add this
+                onReply={setReplyingTo}
+                onCancelReply={() => {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                }}
+                onPostReply={postReply}
+                replyingTo={replyingTo}
+                replyContent={replyContent}
+                onReplyContentChange={(content) => setReplyContent(content)}
+                expandedComments={expandedComments}
+                onToggleReplies={toggleReplies}
+                isAdmin={isAdmin}
+              />
               ))}
             </div>
           ) : (
