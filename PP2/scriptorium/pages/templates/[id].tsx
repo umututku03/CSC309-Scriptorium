@@ -14,6 +14,7 @@ export default function TemplateDetails() {
     code: string;
     language: string;
     userId: string;
+    forkedFromId: number;
   }
 
   const [template, setTemplate] = useState<Template | null>(null);
@@ -124,6 +125,11 @@ export default function TemplateDetails() {
           <h1 className="text-2xl font-bold mb-4">{template.title}</h1>
           <p className="mb-4">{template.explanation}</p>
           <p className="mb-4 text-sm text-gray-600">Tags: {template.tags}</p>
+          {template.forkedFromId && (
+            <p className="mb-4 text-sm text-gray-600">
+              Forked from template ID: {template.forkedFromId}
+            </p>
+          )}
           <pre className="p-4 bg-gray-100 rounded mb-4">{template.code}</pre>
           <button
             className="p-2 bg-blue-600 text-white rounded mr-2"
@@ -156,6 +162,14 @@ export default function TemplateDetails() {
                 </>
               )}
             </>
+          )}
+          {template.forkedFromId && (
+            <button
+              className="p-2 bg-gray-600 text-white rounded mt-4"
+              onClick={() => router.push(`/templates/${template.forkedFromId}`)}
+            >
+              Forked From
+            </button>
           )}
         </>
       )}
