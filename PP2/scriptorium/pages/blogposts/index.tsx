@@ -27,7 +27,6 @@ const BlogPostList: React.FC = () => {
     tag: string | string[];
     content: string | string[];
     templateTitle: string | string[];
-    mine: string | string[];
     userId?: number;
   }>({
     title: query.title || "",
@@ -35,7 +34,6 @@ const BlogPostList: React.FC = () => {
     tag: query.tag || "",
     content: query.content || "",
     templateTitle: query.templateTitle || "",
-    mine: query.mine || "", // Add 'mine' parameter
   });
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -83,7 +81,6 @@ const BlogPostList: React.FC = () => {
     setError(null);
     let accessToken = localStorage.getItem("accessToken");
     let refreshToken = localStorage.getItem("refreshToken");
-    const isMine = searchParams.mine === "true";
 
     try {
       if (accessToken) {
@@ -99,9 +96,9 @@ const BlogPostList: React.FC = () => {
           sortOrder,
           sortBy,
         };
-        if (isMine) {
-          requestParams.userId = userResponse.data.id;
-        }
+
+        requestParams.userId = userResponse.data.id;
+
         var response = await axios.get(`/api/blogposts`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -109,12 +106,6 @@ const BlogPostList: React.FC = () => {
           params: requestParams,
         });
       } else {
-        if (isMine) {
-          setError("Please log in to view your posts.");
-          setBlogPosts([]);
-          setLoading(false);
-          return;
-        }
         var response = await axios.get(`/api/blogposts`, {
           params: {
             ...searchParams,
