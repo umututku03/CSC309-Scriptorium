@@ -65,8 +65,6 @@ LANGUAGES=(
   "php"
   "swift"
   "pl"
-  "sh"
-  "ts"
   "r"
 )
 
