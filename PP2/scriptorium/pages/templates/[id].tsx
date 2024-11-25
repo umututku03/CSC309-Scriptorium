@@ -5,7 +5,6 @@ import axios from "axios"; // Import axios
 export default function TemplateDetails() {
   const router = useRouter();
   const { id } = router.query;
-  // Remove useSession
   // const { data: session } = useSession();
 
   interface Template {
