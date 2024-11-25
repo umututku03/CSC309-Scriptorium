@@ -271,6 +271,12 @@ const BlogPostList: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1
+        className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        Scriptorium
+      </h1>
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-400">Blog Posts</h1>

@@ -5,46 +5,42 @@ import prisma from "@/lib/prisma"; // Ensure correct import
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const authUser = req.headers.authorization ? verifyAuthorizationHeader(req.headers.authorization) : null;
-    const { id, title, explanation, tags, code, language, userId, pageSize, page = 1 } = req.query;
-
-    let limit = 10;
-    if (pageSize) {
-        limit = parseInt(pageSize);
-    }
-    const skip = (page - 1) * limit;
+    const authUser = req.headers.authorization
+      ? verifyAuthorizationHeader(req.headers.authorization)
+      : null;
+    const { id, title, explanation, tags, code, language, userId } = req.query;
 
     try {
-        const codeTemplates = await prisma.codeTemplate.findMany({
-          where: {
-            id: id ? parseInt(id) : undefined,
-            title: title ? { contains: title } : undefined,
-            language: language ? { contains: language } : undefined,
-            tags: tags ? { contains: tags } : undefined,
-            explanation: explanation ? { contains: explanation } : undefined,
-            code: code ? { contains: code } : undefined,
-            userId: userId ? parseInt(userId) : undefined,
+      const codeTemplates = await prisma.codeTemplate.findMany({
+        where: {
+          id: id ? parseInt(id) : undefined,
+          title: title ? { contains: title } : undefined,
+          language: language ? { contains: language } : undefined,
+          tags: tags ? { contains: tags } : undefined,
+          explanation: explanation ? { contains: explanation } : undefined,
+          code: code ? { contains: code } : undefined,
+          userId: userId ? parseInt(userId) : undefined,
+        },
+        include: {
+          blogPosts: {
+            select: {
+              id: true,
+            },
           },
-          include: {
-            blogPosts: {
-              select: {
-                id: true
-              }
-            }
-          },
-          skip: skip,
-          take: limit,
-        });
+        },
+      });
 
-        if (codeTemplates.length === 0) {
-            return res.status(404).json({ message: "No code templates found" });
-        }
+      if (codeTemplates.length === 0) {
+        return res.status(404).json({ message: "No code templates found" });
+      }
 
-        res.status(200).json({ message: "Code templates retrieved successfully", codeTemplates });
-    }
-    catch (error) {
-        console.error("Error fetching code templates:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+      return res.status(200).json({
+        message: "Code templates retrieved successfully",
+        codeTemplates,
+      });
+    } catch (error) {
+      console.error("Error fetching code templates:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 

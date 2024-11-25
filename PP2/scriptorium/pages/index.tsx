@@ -1,20 +1,7 @@
-import Image from "next/image";
-import localFont from "next/font/local";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import axios from "axios"; // Added import for axios
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
   ssr: false,
@@ -78,32 +65,48 @@ export default function Home() {
       alert("Please fill in all fields.");
       return;
     }
+
+    setLoading(true);
+    setOutput("");
     try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("You need to log in to save a template.");
+        return;
+      }
+
       const response = await axios.post(
         "/api/codetemplates",
         {
           title: templateTitle,
           explanation: templateExplanation,
-          tags: templateTags.split(","),
+          tags: templateTags.split(" "),
           code,
           language,
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
+
       if (response.status === 201) {
         alert("Template saved successfully!");
+        setTemplateTitle("");
+        setTemplateExplanation("");
+        setTemplateTags("");
         setShowSaveModal(false);
-      } else {
-        alert(`Error saving template: ${response.data.error}`);
+        setTimeout(() => {
+          router.push("/templates?mine=true"); // Redirect to user's templates
+        }, 2000);
       }
     } catch (error) {
       console.error("Error saving template:", error);
-      alert("Network error.");
+      alert((error as any).response?.data?.error || "Failed to save template.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,7 +128,12 @@ export default function Home() {
       className={`flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg`}
     >
       <header className="flex justify-between items-center w-full max-w-4xl">
-        <h1 className="text-4xl text-blue-900 font-bold mb-8">Scriptorium</h1>
+        <h1
+          className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+          onClick={() => router.push("/")}
+        >
+          Scriptorium
+        </h1>
         {isAuthenticated ? (
           <button
             className="p-2 bg-red-600 text-white rounded hover:bg-red-500"
@@ -245,7 +253,7 @@ export default function Home() {
               <input
                 className="w-full p-2 mb-4 border rounded"
                 type="text"
-                placeholder="Tags (comma-separated)"
+                placeholder="Tags (space-separated)"
                 value={templateTags}
                 onChange={(e) => setTemplateTags(e.target.value)}
               />

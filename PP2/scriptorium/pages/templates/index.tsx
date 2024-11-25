@@ -30,6 +30,8 @@ export default function TemplatesPage() {
   });
   const [currentUserId, setCurrentUserId] = useState<number | null>(null); // Add this line
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1); // Add currentPage state
+  const TEMPLATES_PER_PAGE = 9; // Define templates per page
 
   const fetchTemplates = async () => {
     // setLoading(true);
@@ -37,6 +39,7 @@ export default function TemplatesPage() {
     let accessToken = localStorage.getItem("accessToken");
     let refreshToken = localStorage.getItem("refreshToken");
     const isMine = searchParams.mine === "true";
+    const requestParams = { ...searchParams }; // Remove limit and offset
     try {
       let response;
 
@@ -45,7 +48,6 @@ export default function TemplatesPage() {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         setCurrentUserId(userResponse.data.id);
-        const requestParams = { ...searchParams };
         if (isMine) {
           requestParams.userId = userResponse.data.id;
         }
@@ -62,13 +64,14 @@ export default function TemplatesPage() {
           return;
         }
         response = await axios.get(`/api/codetemplates`, {
-          params: { ...searchParams },
+          params: { ...requestParams }, // Ensure limit and offset are included
         });
       }
 
       if (response.status === 200) {
         console.log("Fetched templates:", response.data.codeTemplates); // Log fetched templates
-        setTemplates(response.data.codeTemplates);
+        const reversedTemplates = [...response.data.codeTemplates].reverse();
+        setTemplates(reversedTemplates);
         setError(null);
       } else if (response.status === 404) {
         setError("No templates found matching your search criteria.");
@@ -88,7 +91,6 @@ export default function TemplatesPage() {
                 headers: { Authorization: `Bearer ${accessToken}` },
               });
               setCurrentUserId(userResponse.data.id);
-              const requestParams = { ...searchParams };
               if (isMine) {
                 requestParams.userId = userResponse.data.id;
               }
@@ -103,7 +105,10 @@ export default function TemplatesPage() {
                   "Fetched templates after refresh:",
                   response.data.codeTemplates
                 ); // Log fetched templates after refresh
-                setTemplates(response.data.codeTemplates);
+                const reversedTemplates = [
+                  ...response.data.codeTemplates,
+                ].reverse(); // Reverse the order
+                setTemplates(reversedTemplates);
                 setError(null);
               } else if (response.status === 404) {
                 setError("No templates found matching your search criteria.");
@@ -131,11 +136,12 @@ export default function TemplatesPage() {
 
   useEffect(() => {
     fetchTemplates();
-  }, [searchParams]);
+  }, [searchParams]); // Remove currentPage from dependencies
 
   const handleSearchChange = (key: string, value: string) => {
     const newSearchParams = { ...searchParams, [key]: value };
     setSearchParams(newSearchParams);
+    setCurrentPage(1); // Reset to first page on search
     router.push(
       {
         pathname: "/templates",
@@ -146,9 +152,23 @@ export default function TemplatesPage() {
     );
   };
 
+  // Calculate totalPages based on templates length
+  const totalPages = Math.ceil(templates.length / TEMPLATES_PER_PAGE);
+  // Determine templates to display on current page
+  const displayedTemplates = templates.slice(
+    (currentPage - 1) * TEMPLATES_PER_PAGE,
+    currentPage * TEMPLATES_PER_PAGE
+  );
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Templates</h1>
+      <h1
+        className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        Scriptorium
+      </h1>
+      <h1 className="text-2xl font-bold mb-4">Code Templates</h1>
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1">
@@ -196,7 +216,7 @@ export default function TemplatesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Log templates before rendering */}
-        {templates.map((template) => (
+        {displayedTemplates.map((template) => (
           <div
             key={template.id}
             className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
@@ -241,10 +261,35 @@ export default function TemplatesPage() {
             </div>
           </div>
         ))}
-        {templates.length === 0 && !error && (
+        {displayedTemplates.length === 0 && !error && (
           <p className="text-center text-gray-500">No templates found.</p>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-blue-500 text-white rounded mr-2 disabled:bg-gray-300"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-blue-500 text-white rounded ml-2 disabled:bg-gray-300"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

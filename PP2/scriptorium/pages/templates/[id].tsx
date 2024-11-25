@@ -5,6 +5,7 @@ import axios from "axios"; // Import axios
 export default function TemplateDetails() {
   const router = useRouter();
   const { id } = router.query;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   // const { data: session } = useSession();
 
   interface Template {
@@ -52,6 +53,7 @@ export default function TemplateDetails() {
       });
       if (response.status === 200) {
         setUserId(response.data.id);
+        setIsAuthenticated(true);
       }
     } catch (error) {
       // Handle error
@@ -120,15 +122,39 @@ export default function TemplateDetails() {
 
   return (
     <div className="p-8">
+      <h1
+        className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        Scriptorium
+      </h1>
+      {/* Add navigation buttons */}
+      <div className="flex flex-wrap mb-4">
+        {isAuthenticated && (
+          <>
+            <button
+              onClick={() => router.push("/templates?mine=true")}
+              className="p-2 bg-white text-blue-600 rounded hover:text-blue-400"
+            >
+              My Templates
+            </button>
+          </>
+        )}
+
+        <button
+          onClick={() => router.push("/templates")}
+          className="p-2 bg-white text-blue-600 rounded hover:text-blue-400"
+        >
+          Explore Templates
+        </button>
+      </div>
       {template && (
         <>
           <h1 className="text-2xl font-bold mb-4">{template.title}</h1>
           <p className="mb-4">{template.explanation}</p>
           <p className="mb-4 text-sm text-gray-600">Tags: {template.tags}</p>
           {template.forkedFromId && (
-            <p className="mb-4 text-sm text-gray-600">
-              Forked from template ID: {template.forkedFromId}
-            </p>
+            <p className="mb-4 text-sm text-gray-600">FORKED TEMPLATE</p>
           )}
           <pre className="p-4 bg-gray-100 rounded mb-4">{template.code}</pre>
           <button
@@ -154,7 +180,7 @@ export default function TemplateDetails() {
                     Edit Template
                   </button>
                   <button
-                    className="p-2 bg-red-600 text-white rounded"
+                    className="p-2 bg-red-600 text-white rounded mr-2 "
                     onClick={deleteTemplate}
                   >
                     Delete Template
@@ -165,7 +191,7 @@ export default function TemplateDetails() {
           )}
           {template.forkedFromId && (
             <button
-              className="p-2 bg-gray-600 text-white rounded mt-4"
+              className="p-2 bg-gray-600 text-white rounded"
               onClick={() => router.push(`/templates/${template.forkedFromId}`)}
             >
               Forked From
