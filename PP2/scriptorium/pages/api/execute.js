@@ -82,10 +82,10 @@ export default async function handler(req, res) {
   }
 
   const dockerCommand = [
-    'docker run --rm', // Add -i to handle stdin
-    `-v ${projectTmpDir}:/sandbox`, // Mount the project directory to the container
+    'docker run --rm -i', 
+    `-v ${projectTmpDir}:/sandbox`,
     dockerImage,
-    `/sandbox/${fileName}`, // Execute the file directly
+    `/sandbox/${fileName}`,
   ];
 
   console.log(`Executing Docker command: ${dockerCommand.join(' ')}`);
