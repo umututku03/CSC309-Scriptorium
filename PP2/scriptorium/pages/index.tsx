@@ -148,12 +148,6 @@ export default function Home() {
           {isAuthenticated && (
             <>
               <button
-                onClick={() => router.push("/blogposts?mine=true")}
-                className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-              >
-                My Posts
-              </button>
-              <button
                 onClick={() => router.push("/templates?mine=true")}
                 className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
               >
