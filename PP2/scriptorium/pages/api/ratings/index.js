@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 
                     return res.status(200).json({ message: "Rating updated successfully", updatedRating });
                 } else {
-                    return res.status(200).json({ message: "No changes in votetype", existingRating });
+                    return res.status(201).json({ message: "No changes in votetype", existingRating });
                 }
             } else {
                 // Create a new rating if no existing rating was found
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
                     });
                 }
 
-                return res.status(201).json({ message: "Rating created successfully", newRating });
+                return res.status(202).json({ message: "Rating created successfully", newRating });
             }
         } else {
             return res.status(405).json({ error: "Method Not Allowed" });
