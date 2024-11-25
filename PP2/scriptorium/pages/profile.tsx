@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 
 export default function Profile() {
@@ -9,20 +10,55 @@ export default function Profile() {
     avatar: "",
     phone: "",
   });
-
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true);
+      let accessToken = localStorage.getItem("accessToken");
+      let refreshToken = localStorage.getItem("refreshToken");
       try {
-        const accessToken = localStorage.getItem("accessToken");
-        const response = await axios.get("/api/users/me", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        setUserData(response.data.user);
-      } catch (err) {
-        setError("Failed to fetch user data");
+        if (accessToken) {
+          const response = await axios.get("/api/users/me", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          setUserData(response.data);
+          setError("");
+        } else {
+          setError("You need to log in to view your profile");
+          router.push("/login");
+        }
+      } catch (err: any) {
+        if (err.response?.status === 401 && refreshToken) {
+          try {
+            // Attempt to refresh the access token
+            const refreshResponse = await axios.post("/api/users/refresh", {
+              refreshToken,
+            });
+            accessToken = refreshResponse.data.accessToken;
+
+            if (accessToken) {
+              localStorage.setItem("accessToken", accessToken);
+            }
+            // Retry fetching user data with new access token
+            const response = await axios.get("/api/users/me", {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            setUserData(response.data);
+            setError("");
+          } catch (refreshErr) {
+            // Refresh token failed; redirect to login
+            setError("Session expired. Please log in again.");
+            router.push("/login");
+          }
+        } else {
+          setError("Failed to fetch user data");
+        }
+      } finally {
+        setLoading(false);
       }
     };
     fetchUserData();

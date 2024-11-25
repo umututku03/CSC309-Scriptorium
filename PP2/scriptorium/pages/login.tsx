@@ -1,62 +1,57 @@
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import { useRouter } from "next/router";
+import axios from "axios";
 
-export default function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
-      const response = await axios.post("/api/users/login", formData);
-      setSuccess("Login successful");
-      setError("");
-      // Save tokens to local storage or context
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
+      const response = await axios.post("/api/users/login", {
+        email,
+        password,
+      });
+      const { accessToken, refreshToken } = response.data;
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      // Redirect to home page after login
+      router.push("/");
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.error);
+      if (axios.isAxiosError(err)) {
+        console.error(
+          "Failed to login:",
+          err.response?.data?.error || err.message
+        );
       } else {
-        setError("An unexpected error occurred");
+        console.error("Failed to login:", err);
       }
-      setSuccess("");
+      alert("Login failed. Please check your credentials.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg">
-      <header className="text-4xl text-blue-900 font-bold mb-8">
-        Scriptorium
-      </header>
-      <div className="bg-white p-6 rounded shadow-md w-80">
-        <h2 className="text-2xl mb-4">Login</h2>
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
+      <h1 className="text-4xl font-bold mb-8">Login</h1>
+      <div className="w-full max-w-md space-y-4">
         <input
+          className="w-full p-2 border rounded"
           type="email"
-          name="email"
           placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="mb-2 p-2 border rounded w-full"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
+          className="w-full p-2 border rounded"
           type="password"
-          name="password"
           placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="mb-2 p-2 border rounded w-full"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <button
-          type="submit"
-          className="bg-blue-900 text-white p-2 rounded w-full"
+          className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+          onClick={handleLogin}
         >
           Login
         </button>
