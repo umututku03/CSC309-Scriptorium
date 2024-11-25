@@ -13,7 +13,7 @@ export default function TemplatesPage() {
       title: string;
       explanation: string;
       tags: string;
-      user: { id: string; firstName: string; lastName: string };
+      user: { id: number; firstName: string; lastName: string };
     }[]
   >([]);
   const [searchParams, setSearchParams] = useState<{
@@ -67,6 +67,7 @@ export default function TemplatesPage() {
       }
 
       if (response.status === 200) {
+        console.log("Fetched templates:", response.data.codeTemplates); // Log fetched templates
         setTemplates(response.data.codeTemplates);
         setError(null);
       } else if (response.status === 404) {
@@ -98,6 +99,10 @@ export default function TemplatesPage() {
                 params: requestParams,
               });
               if (response.status === 200) {
+                console.log(
+                  "Fetched templates after refresh:",
+                  response.data.codeTemplates
+                ); // Log fetched templates after refresh
                 setTemplates(response.data.codeTemplates);
                 setError(null);
               } else if (response.status === 404) {
@@ -190,6 +195,7 @@ export default function TemplatesPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Log templates before rendering */}
         {templates.map((template) => (
           <div
             key={template.id}
