@@ -113,6 +113,20 @@ export default function Navbar() {
                     >
                       Edit Profile
                     </Link>
+                    <Link
+                      href="/templates?mine=true"
+                      className="block px-4 py-2 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Templates
+                    </Link>
+                    <Link
+                      href="/blogposts?author=me"
+                      className="block px-4 py-2 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      My Blogs
+                    </Link>
                     <div className="border-t border-secondary dark:border-secondary/10 my-1"></div>
                     <button
                       onClick={handleLogout}
@@ -200,6 +214,20 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                   >
                     Edit Profile
+                  </Link>
+                  <Link
+                    href="/templates?mine=true"
+                    className="px-4 py-2 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200 text-sm"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    My Templates
+                  </Link>
+                  <Link
+                    href="/blogposts?author=me"
+                    className="px-4 py-2 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200 text-sm"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    My Blogs
                   </Link>
                   <div className="border-t border-secondary dark:border-secondary/10 my-1"></div>
                   <button
