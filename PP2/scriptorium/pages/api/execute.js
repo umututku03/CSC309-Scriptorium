@@ -95,23 +95,47 @@ export default async function handler(req, res) {
       exec(dockerCommand, { timeout: 5000 }, (error, stdout, stderr) => {
         console.log('stdout:', stdout);
         console.log('stderr:', stderr);
+
         if (error) {
           console.error('Docker execution error:', {
             message: error.message,
             code: error.code,
             signal: error.signal,
           });
-          reject(error);
-        } else {
-          resolve(stdout);
+
+          // Determine error type and return more detailed feedback
+          if (error.signal === 'SIGTERM') {
+            return reject({ type: 'timeout', message: 'Execution timed out.' });
+          }
+          return reject({ type: 'execution_error', message: stderr || error.message });
         }
+
+        resolve({ stdout, stderr });
       });
     });
 
-    return res.status(200).json({ stdout: output });
+    // Handle warnings and errors in the output
+    const warnings = output.stderr && output.stderr.includes('warning')
+      ? output.stderr.split('\n').filter((line) => line.includes('warning'))
+      : [];
+
+    return res.status(200).json({
+      stdout: output.stdout,
+      stderr: output.stderr,
+      warnings,
+      status: warnings.length ? 'success_with_warnings' : 'success',
+    });
   } catch (error) {
     console.error('Execution failed:', error);
-    return res.status(422).json({ error: error.stderr || error.message || 'Execution failed' });
+
+    if (error.type === 'timeout') {
+      return res.status(422).json({ error: 'Execution timed out.' });
+    }
+
+    return res.status(422).json({
+      error: error.message || 'Execution failed',
+      details: error.stderr || '',
+    });
   } finally {
     // Cleanup temporary file
     try {

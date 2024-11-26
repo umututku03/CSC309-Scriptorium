@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import axios from "axios"; // Added import for axios
+import axios from "axios";
+import { useTheme } from "next-themes";
 
 const CodeMirror = dynamic(() => import("@uiw/react-codemirror"), {
   ssr: false,
@@ -17,48 +18,80 @@ export default function Home() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setAccessToken] = useState("");
   const router = useRouter();
+  const { theme } = useTheme();
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateExplanation, setTemplateExplanation] = useState("");
   const [templateTags, setTemplateTags] = useState("");
 
+  const defaultTemplates: Record<string, string> = {
+    py: `# Python Template\nprint("Hello, World!")`,
+    js: `// JavaScript Template\nconsole.log("Hello, World!");`,
+    java: `// Java Template\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println("Hello, World!");\n  }\n}`,
+    c: `// C Template\n#include <stdio.h>\nint main() {\n  printf("Hello, World!\\n");\n  return 0;\n}`,
+    cpp: `// C++ Template\n#include <iostream>\nint main() {\n  std::cout << "Hello, World!" << std::endl;\n  return 0;\n}`,
+    go: `// Go Template\npackage main\nimport "fmt"\nfunc main() {\n  fmt.Println("Hello, World!")\n}`,
+    rs: `// Rust Template\nfn main() {\n  println!("Hello, World!");\n}`,
+    rb: `# Ruby Template\nputs "Hello, World!"`,
+    php: `// PHP Template\n<?php\necho "Hello, World!";\n?>`,
+    swift: `// Swift Template\nimport Foundation\nprint("Hello, World!")`,
+    pl: `# Perl Template\nprint "Hello, World!\\n";`,
+    r: `# R Template\ncat("Hello, World!\\n")`,
+  };
+
   useEffect(() => {
-    // Check for tokens in localStorage
     const token = localStorage.getItem("accessToken");
     if (token) {
       setIsAuthenticated(true);
       setAccessToken(token);
     }
-    // Load code and language from query parameters if present
     if (router.query.code) {
       setCode(router.query.code as string);
+    } else {
+      setCode(defaultTemplates[language]);
     }
     if (router.query.language) {
       setLanguage(router.query.language as string);
     }
-  }, [router.query]);
+  }, [router.query, language]);
 
   const runCode = async () => {
     setLoading(true);
-    setOutput("");
+    setOutput(""); // Clear previous output
     try {
       const response = await fetch("/api/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, language, stdin }),
       });
+  
       const data = await response.json();
+  
       if (response.ok) {
-        setOutput(data.stdout);
+        setOutput(data.stdout || "Code executed successfully with no output.");
       } else {
-        setOutput(data.stderr || "Error executing code.");
+        // Handle various error scenarios based on the response
+        const errorMessage =
+          data.error ||
+          "An error occurred during code execution. Please check your code and try again.";
+  
+        // Append additional details if available
+        const errorDetails = data.details
+          ? `\nDetails:\n${data.details}`
+          : "";
+  
+        const formattedError = `Error: ${errorMessage}${errorDetails}`;
+        setOutput(formattedError);
       }
     } catch (error) {
-      setOutput("Network error.");
+      // Handle unexpected network or system errors
+      setOutput("Network error: Unable to reach the server.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+  
 
   const saveTemplate = async () => {
     if (!templateTitle || !templateExplanation || !templateTags) {
@@ -67,7 +100,6 @@ export default function Home() {
     }
 
     setLoading(true);
-    setOutput("");
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -99,7 +131,7 @@ export default function Home() {
         setTemplateTags("");
         setShowSaveModal(false);
         setTimeout(() => {
-          router.push("/templates?mine=true"); // Redirect to user's templates
+          router.push("/templates?mine=true");
         }, 2000);
       }
     } catch (error) {
@@ -111,35 +143,36 @@ export default function Home() {
   };
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg`}
-    >
-      <main className="flex flex-col gap-8 w-full max-w-4xl">
-        {/* Add navigation buttons */}
+    <div className="min-h-screen bg-background text-foreground p-8 pb-20 gap-16 sm:p-20">
+      <main className="flex flex-col gap-8 w-full max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-center">Code Execution</h1>
+
         <div className="flex flex-wrap gap-4">
           {isAuthenticated && (
-            <>
-              <button
-                onClick={() => router.push("/templates?mine=true")}
-                className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-              >
-                My Templates
-              </button>
-            </>
+            <button
+              onClick={() => router.push("/templates?mine=true")}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
+            >
+              My Templates
+            </button>
           )}
         </div>
+
         <div className="flex gap-4 items-center flex-col sm:flex-row w-full">
           <select
-            className="p-2 text-lg border rounded"
+            className="p-2 text-lg bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground"
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            onChange={(e) => {
+              setLanguage(e.target.value);
+              setCode(defaultTemplates[e.target.value]);
+            }}
           >
             <option value="py">Python</option>
             <option value="js">JavaScript</option>
             <option value="java">Java</option>
             <option value="c">C</option>
             <option value="cpp">C++</option>
-            <option value="go">Python</option>
+            <option value="go">Go</option>
             <option value="rs">Rust</option>
             <option value="rb">Ruby</option>
             <option value="php">PHP</option>
@@ -148,47 +181,52 @@ export default function Home() {
             <option value="r">R</option>
           </select>
         </div>
-        <CodeMirror
-          value={code}
-          className="w-full h-96 text-lg"
-          extensions={[
-            language === "py"
-              ? langs.python()
-              : language === "js"
-              ? langs.javascript()
-              : language === "java"
-              ? langs.java()
-              : language === "c"
-              ? langs.cpp()
-              : language === "cpp"
-              ? langs.cpp()
-              : language === "go"
-              ? langs.go()
-              : language === "rs"
-              ? langs.rust()
-              : language === "ruby"
-              ? langs.ruby()
-              : language === "php"
-              ? langs.php()
-              : language === "swift"
-              ? langs.swift()
-              : language === "pl"
-              ? langs.perl()
-              : language === "r"
-              ? langs.r()
-              : []
-          ]}
-          onChange={(value) => setCode(value)}
-        />
+
+        <div className="border border-border rounded-md overflow-hidden">
+          <CodeMirror
+            value={code}
+            height="400px"
+            className="text-lg"
+            theme={theme === "dark" ? "dark" : "light"}
+            extensions={[
+              language === "py"
+                ? langs.python()
+                : language === "js"
+                ? langs.javascript()
+                : language === "java"
+                ? langs.java()
+                : language === "c" || language === "cpp"
+                ? langs.cpp()
+                : language === "go"
+                ? langs.go()
+                : language === "rs"
+                ? langs.rust()
+                : language === "rb"
+                ? langs.ruby()
+                : language === "php"
+                ? langs.php()
+                : language === "swift"
+                ? langs.swift()
+                : language === "pl"
+                ? langs.perl()
+                : language === "r"
+                ? langs.r()
+                : []
+            ]}
+            onChange={(value) => setCode(value)}
+          />
+        </div>
+
         <textarea
-          className="w-full p-4 text-lg border rounded"
+          className="w-full p-4 text-lg bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
           placeholder="Standard Input"
           value={stdin}
           onChange={(e) => setStdin(e.target.value)}
         />
+
         <div className="flex justify-between">
           <button
-            className="w-20 p-3 text-sm bg-blue-900 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             onClick={runCode}
             disabled={loading}
           >
@@ -196,49 +234,51 @@ export default function Home() {
           </button>
           {isAuthenticated && (
             <button
-              className="w-32 p-3 text-sm bg-green-600 text-white rounded hover:bg-green-500"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
               onClick={() => setShowSaveModal(true)}
             >
               Save as Template
             </button>
           )}
         </div>
-        <pre className="w-full p-4 text-lg border rounded bg-gray-100">
+
+        <pre className="w-full p-4 text-lg bg-muted border border-border rounded-md text-muted-foreground">
           {output}
         </pre>
+
         {showSaveModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
+          <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
+            <div className="bg-card text-card-foreground p-6 rounded-lg shadow-lg max-w-md w-full border border-border">
               <h2 className="text-xl font-bold mb-4">Save Template</h2>
               <input
-                className="w-full p-2 mb-2 border rounded"
+                className="w-full p-2 mb-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
                 type="text"
                 placeholder="Title"
                 value={templateTitle}
                 onChange={(e) => setTemplateTitle(e.target.value)}
               />
               <textarea
-                className="w-full p-2 mb-2 border rounded"
+                className="w-full p-2 mb-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
                 placeholder="Explanation"
                 value={templateExplanation}
                 onChange={(e) => setTemplateExplanation(e.target.value)}
               />
               <input
-                className="w-full p-2 mb-4 border rounded"
+                className="w-full p-2 mb-4 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
                 type="text"
                 placeholder="Tags (space-separated)"
                 value={templateTags}
                 onChange={(e) => setTemplateTags(e.target.value)}
               />
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2">
                 <button
-                  className="mr-2 p-2 bg-gray-300 rounded"
+                  className="px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors duration-200"
                   onClick={() => setShowSaveModal(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="p-2 bg-blue-600 text-white rounded"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
                   onClick={saveTemplate}
                 >
                   Save
