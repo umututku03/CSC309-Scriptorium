@@ -478,7 +478,7 @@ const BlogPostList: React.FC = () => {
                     <div className="flex items-center text-sm text-gray-500">
                       <UserAvatar user={post.user} />
                       <div className="ml-2">
-                        <p className="font-medium hover:underline cursor-pointer">
+                        <p className="font-medium">
                           {post.user.firstName} {post.user.lastName}
                         </p>
                       </div>
