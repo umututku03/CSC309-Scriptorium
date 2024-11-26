@@ -8,6 +8,11 @@ interface UserData {
   email: string;
   avatar: string;
   phone: string;
+  stats: {
+    blogPosts: number;
+    templates: number;
+    comments: number;
+  };
 }
 
 export default function ViewProfile() {
@@ -27,10 +32,22 @@ export default function ViewProfile() {
       }
 
       try {
+        // Fetch user data along with statistics
         const response = await axios.get("/api/users/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-        setUserData(response.data);
+
+        console.log("API Response:", response.data); // Debug log
+
+        // Map API response to userData state
+        setUserData({
+          ...response.data,
+          stats: response.data.statistics || {
+            blogPosts: 0,
+            templates: 0,
+            comments: 0,
+          },
+        });
         setError("");
       } catch (err: any) {
         if (err.response?.status === 401 && refreshToken) {
@@ -44,7 +61,16 @@ export default function ViewProfile() {
             const retryResponse = await axios.get("/api/users/me", {
               headers: { Authorization: `Bearer ${newAccessToken}` },
             });
-            setUserData(retryResponse.data);
+
+            // Map API response to userData state
+            setUserData({
+              ...retryResponse.data,
+              stats: retryResponse.data.statistics || {
+                blogPosts: 0,
+                templates: 0,
+                comments: 0,
+              },
+            });
             setError("");
           } catch (refreshErr) {
             setError("Session expired. Please log in again.");
@@ -108,7 +134,39 @@ export default function ViewProfile() {
                 <span className="font-medium">Email:</span> {userData.email}
               </p>
               <p className="text-muted-foreground text-lg">
-                <span className="font-medium">Phone:</span> {userData.phone || "N/A"}
+                <span className="font-medium">Phone:</span>{" "}
+                {userData.phone || "N/A"}
+              </p>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <hr className="my-6 border-border" />
+
+          {/* User Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div className="p-4 bg-background rounded-lg shadow-md">
+              <h2 className="text-xl font-bold text-card-foreground">
+                Blog Posts
+              </h2>
+              <p className="text-3xl font-bold text-primary">
+                {userData.stats.blogPosts}
+              </p>
+            </div>
+            <div className="p-4 bg-background rounded-lg shadow-md">
+              <h2 className="text-xl font-bold text-card-foreground">
+                Templates
+              </h2>
+              <p className="text-3xl font-bold text-primary">
+                {userData.stats.templates}
+              </p>
+            </div>
+            <div className="p-4 bg-background rounded-lg shadow-md">
+              <h2 className="text-xl font-bold text-card-foreground">
+                Comments
+              </h2>
+              <p className="text-3xl font-bold text-primary">
+                {userData.stats.comments}
               </p>
             </div>
           </div>
