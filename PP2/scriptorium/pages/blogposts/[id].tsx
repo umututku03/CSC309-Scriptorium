@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import UserAvatar from "../components/user-avatar";
 
 interface Comment {
   id: number;
   content: string;
   upvotes: number;
   downvotes: number;
-  user: { firstName: string, lastName: string, id: number };
+  user: { firstName: string, lastName: string, id: number, avatar: string };
   children: Comment[];
   parentId: number | null;
   report_count: number;
@@ -23,7 +24,7 @@ interface BlogPost {
   upvotes: number;
   downvotes: number;
   templates: { id: number; title: string }[];
-  user: { firstName: string; lastName: string, id: number };
+  user: { firstName: string; lastName: string, id: number, avatar: string };
   comments: Comment[];
   isHidden: boolean;
 }
@@ -130,15 +131,11 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
     <div className="bg-gray-50 rounded-lg p-4">
       {/* User Info */}
       <div className="flex text-gray-500 items-center mb-2">
-        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-          {comment.user.firstName[0]}
-        </div>
+        <UserAvatar user={comment.user} />
         <div className="ml-2">
-          <Link href={`/users/${comment.user.id}`}>
-            <p className="font-medium hover:underline cursor-pointer">
-              {comment.user.firstName} {comment.user.lastName}
-            </p>
-          </Link>
+          <p className="font-medium">
+            {comment.user.firstName} {comment.user.lastName}
+          </p>
         </div>
         <div className="flex items-center space-x-2 ml-4">
           {isAdmin && comment.report_count > 0 && (
@@ -795,14 +792,10 @@ const BlogPostDetail: React.FC = () => {
               <h1 className="text-3xl text-black font-bold mb-2">{blogPost.title}</h1>
               <div className="text-sm text-gray-500 space-y-2">
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-                  {blogPost.user.firstName[0]}
-                </div>
-                <Link href={`/users/${blogPost.user.id}`}>
-                  <span className="ml-2 hover:underline cursor-pointer">
-                    {blogPost.user.firstName} {blogPost.user.lastName}
-                  </span>
-                </Link>
+                <UserAvatar user={blogPost.user} />
+                <span className="ml-2">
+                  {blogPost.user.firstName} {blogPost.user.lastName}
+                </span>
               </div>
                 <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                   {blogPost.tag}

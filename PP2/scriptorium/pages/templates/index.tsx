@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
-import UserAvatar from "@/components/user-avatar";
+import UserAvatar from "@/pages/components/user-avatar";
 
 export default function TemplatesPage() {
   const router = useRouter();
