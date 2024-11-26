@@ -7,17 +7,9 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("py");
-  const [stdin, setStdin] = useState("");
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [accessToken, setAccessToken] = useState("");
   const router = useRouter();
-
-  const [showSaveModal, setShowSaveModal] = useState(false);
-  const [templateTitle, setTemplateTitle] = useState("");
-  const [templateExplanation, setTemplateExplanation] = useState("");
-  const [templateTags, setTemplateTags] = useState("");
 
   useEffect(() => {
     // Check for tokens in localStorage
@@ -34,90 +26,6 @@ export default function Home() {
       setLanguage(router.query.language as string);
     }
   }, [router.query]);
-
-  const runCode = async () => {
-    setLoading(true);
-    setOutput("");
-    try {
-      const response = await fetch("/api/execute", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, language, stdin }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setOutput(data.stdout);
-      } else {
-        setOutput(data.stderr || "Error executing code.");
-      }
-    } catch (error) {
-      setOutput("Network error.");
-    }
-    setLoading(false);
-  };
-
-  const saveTemplate = async () => {
-    if (!templateTitle || !templateExplanation || !templateTags) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    setLoading(true);
-    setOutput("");
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        alert("You need to log in to save a template.");
-        return;
-      }
-
-      const response = await axios.post(
-        "/api/codetemplates",
-        {
-          title: templateTitle,
-          explanation: templateExplanation,
-          tags: templateTags.split(" "),
-          code,
-          language,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        alert("Template saved successfully!");
-        setTemplateTitle("");
-        setTemplateExplanation("");
-        setTemplateTags("");
-        setShowSaveModal(false);
-        setTimeout(() => {
-          router.push("/templates?mine=true"); // Redirect to user's templates
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Error saving template:", error);
-      alert((error as any).response?.data?.error || "Failed to save template.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = () => {
-    // Redirect to login page
-    router.push("/login");
-  };
-
-  const handleLogout = () => {
-    // Clear tokens and update state
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    setIsAuthenticated(false);
-    setAccessToken("");
-  };
 
   return (
     <div className="flex flex-col bg-background">
@@ -201,7 +109,7 @@ export default function Home() {
               Read insightful articles from developers and educators.
             </p>
             <Link
-              href="/blog"
+              href="/blogposts"
               className="text-primary hover:text-primary/80 font-medium inline-flex items-center"
             >
               Browse Blogs
