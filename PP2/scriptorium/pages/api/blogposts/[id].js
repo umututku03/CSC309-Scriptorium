@@ -124,7 +124,8 @@ export default async function handler(req, res) {
                                 select: {
                                     firstName: true,
                                     lastName: true,
-                                    id: true
+                                    id: true,
+                                    avatar: true
                                 }
                             },
                             children: true,

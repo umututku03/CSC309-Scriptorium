@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
+import UserAvatar from "@/pages/components/user-avatar";
 
 export default function TemplatesPage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function TemplatesPage() {
       title: string;
       explanation: string;
       tags: string;
-      user: { id: number; firstName: string; lastName: string };
+      user: { id: number; firstName: string; lastName: string, avatar: string };
     }[]
   >([]);
   const [searchParams, setSearchParams] = useState<{
@@ -246,15 +247,11 @@ export default function TemplatesPage() {
               {/* Display the owner of the template */}
               {template.user && (
                 <div className="flex items-center text-sm text-gray-500 mt-4">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-xs">
-                    {template.user.firstName[0]}
-                  </div>
+                  <UserAvatar user={template.user} />
                   <div className="ml-2">
-                    <Link href={`/users/${template.user.id}`}>
-                      <p className="font-medium hover:underline cursor-pointer">
-                        {template.user.firstName} {template.user.lastName}
-                      </p>
-                    </Link>
+                    <p className="font-medium hover:underline cursor-pointer">
+                      {template.user.firstName} {template.user.lastName}
+                    </p>
                   </div>
                 </div>
               )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import UserAvatar from "../components/user-avatar";
 
 interface BlogPost {
   id: number;
@@ -11,7 +12,7 @@ interface BlogPost {
   upvotes: number;
   downvotes: number;
   templates: { id: number; title: string }[];
-  user: { firstName: string; lastName: string; id: number };
+  user: { firstName: string; lastName: string; id: number; avatar: string; };
   report_count: number;
   isHidden: boolean;
 }
@@ -475,15 +476,11 @@ const BlogPostList: React.FC = () => {
                     )}
 
                     <div className="flex items-center text-sm text-gray-500">
-                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-xs">
-                        {post.user.firstName[0]}
-                      </div>
+                      <UserAvatar user={post.user} />
                       <div className="ml-2">
-                        <Link href={`/users/${post.user.id}`}>
-                          <p className="font-medium hover:underline cursor-pointer">
-                            {post.user.firstName} {post.user.lastName}
-                          </p>
-                        </Link>
+                        <p className="font-medium hover:underline cursor-pointer">
+                          {post.user.firstName} {post.user.lastName}
+                        </p>
                       </div>
                     </div>
                   </div>

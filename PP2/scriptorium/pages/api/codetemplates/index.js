@@ -32,6 +32,7 @@ export default async function handler(req, res) {
               id: true,
               firstName: true,
               lastName: true,
+              avatar: true
             }
           }
         },

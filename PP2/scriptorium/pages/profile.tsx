@@ -93,7 +93,7 @@ export default function Profile() {
         Scriptorium
       </header>
       <div className="bg-white p-6 rounded shadow-md w-80">
-        <h2 className="text-2xl mb-4">Profile</h2>
+        <h2 className="text-2xl mb-4">Edit Profile</h2>
         {error && <p className="text-red-500">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
         <input
