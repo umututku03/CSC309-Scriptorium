@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import UserAvatar from "../components/user-avatar";
 
 interface BlogPost {
   id: number;
@@ -11,7 +12,7 @@ interface BlogPost {
   upvotes: number;
   downvotes: number;
   templates: { id: number; title: string }[];
-  user: { firstName: string; lastName: string; id: number };
+  user: { firstName: string; lastName: string; id: number; avatar: string; };
   report_count: number;
   isHidden: boolean;
 }
@@ -21,7 +22,14 @@ const BlogPostList: React.FC = () => {
   const { query } = router;
 
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [searchParams, setSearchParams] = useState({
+  const [searchParams, setSearchParams] = useState<{
+    title: string | string[];
+    description: string | string[];
+    tag: string | string[];
+    content: string | string[];
+    templateTitle: string | string[];
+    userId?: number;
+  }>({
     title: query.title || "",
     description: query.description || "",
     tag: query.tag || "",
@@ -36,7 +44,6 @@ const BlogPostList: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("rating");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-
 
   const handleToggleHide = async (id: number, currentHiddenState: boolean) => {
     try {
@@ -54,17 +61,18 @@ const BlogPostList: React.FC = () => {
           },
         }
       );
-  
+
       // Update local state
-      setBlogPosts(prevPosts =>
-        prevPosts.map(post =>
-          post.id === id
-            ? { ...post, isHidden: !currentHiddenState }
-            : post
+      setBlogPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === id ? { ...post, isHidden: !currentHiddenState } : post
         )
       );
     } catch (err: any) {
-      console.error("Failed to update post visibility:", err.response?.data?.error || err.message);
+      console.error(
+        "Failed to update post visibility:",
+        err.response?.data?.error || err.message
+      );
       alert("Failed to update post visibility. Please try again.");
     }
   };
@@ -77,21 +85,36 @@ const BlogPostList: React.FC = () => {
 
     try {
       if (accessToken) {
-        const userResponse = await axios.get('/api/users/me', {
-          headers: { Authorization: `Bearer ${accessToken}` }
+        const userResponse = await axios.get("/api/users/me", {
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
-        setIsAdmin(userResponse.data.role === 'ADMIN');
-        setCurrentUserId(userResponse.data.id); 
+        setIsAdmin(userResponse.data.role === "ADMIN");
+        setCurrentUserId(userResponse.data.id);
+        const requestParams = {
+          ...searchParams,
+          page,
+          pageSize: 12,
+          sortOrder,
+          sortBy,
+        };
+
+        requestParams.userId = userResponse.data.id;
+
         var response = await axios.get(`/api/blogposts`, {
           headers: {
-            Authorization: `Bearer ${accessToken}`
+            Authorization: `Bearer ${accessToken}`,
           },
-          params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
+          params: requestParams,
         });
-      }
-      else {
+      } else {
         var response = await axios.get(`/api/blogposts`, {
-          params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
+          params: {
+            ...searchParams,
+            page,
+            pageSize: 12,
+            sortOrder,
+            sortBy,
+          },
         });
       }
 
@@ -101,38 +124,47 @@ const BlogPostList: React.FC = () => {
       if (err.status === 401) {
         if (refreshToken) {
           try {
-            response = await axios.post('/api/users/refresh', { refreshToken });
+            response = await axios.post("/api/users/refresh", { refreshToken });
             accessToken = response.data.accessToken;
             if (accessToken) {
               localStorage.setItem("accessToken", accessToken);
-              const userResponse = await axios.get('/api/users/me', {
-                headers: { Authorization: `Bearer ${accessToken}` }
+              const userResponse = await axios.get("/api/users/me", {
+                headers: { Authorization: `Bearer ${accessToken}` },
               });
-              setIsAdmin(userResponse.data.role === 'ADMIN');
-              setCurrentUserId(userResponse.data.id); 
+              setIsAdmin(userResponse.data.role === "ADMIN");
+              setCurrentUserId(userResponse.data.id);
               response = await axios.get(`/api/blogposts`, {
                 headers: {
-                  Authorization: `Bearer ${accessToken}`
+                  Authorization: `Bearer ${accessToken}`,
                 },
-                params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
+                params: {
+                  ...searchParams,
+                  page,
+                  pageSize: 12,
+                  sortOrder,
+                  sortBy,
+                },
               });
               setBlogPosts(response.data.displayedPosts);
               setTotalPages(response.data.totalPages || 1);
             }
-          }
-          catch (err: any) {
+          } catch (err: any) {
             try {
               response = await axios.get(`/api/blogposts`, {
-                params: { ...searchParams, page, pageSize: 12, sortOrder, sortBy },
+                params: {
+                  ...searchParams,
+                  page,
+                  pageSize: 12,
+                  sortOrder,
+                  sortBy,
+                },
               });
-            } 
-            catch (err: any) {
+            } catch (err: any) {
               setError("Failed to load blog posts. Please try again later.");
             }
           }
         }
-      }
-      else if (err.response?.status === 404) {
+      } else if (err.response?.status === 404) {
         setError("No blog posts found matching your search criteria.");
         setBlogPosts([]);
       } else {
@@ -177,7 +209,7 @@ const BlogPostList: React.FC = () => {
         alert("You need to log in to vote");
         return;
       }
-  
+
       const res = await axios.post(
         `/api/ratings`,
         { votetype, blogPostId: id },
@@ -194,13 +226,17 @@ const BlogPostList: React.FC = () => {
             post.id === id
               ? {
                   ...post,
-                  upvotes: votetype === "UPVOTE" ? post.upvotes + 1 : post.upvotes - 1,
-                  downvotes: votetype === "DOWNVOTE" ? post.downvotes + 1 : post.downvotes - 1,
+                  upvotes:
+                    votetype === "UPVOTE" ? post.upvotes + 1 : post.upvotes - 1,
+                  downvotes:
+                    votetype === "DOWNVOTE"
+                      ? post.downvotes + 1
+                      : post.downvotes - 1,
                 }
               : post
           )
         );
-      } 
+      }
 
       // Created new rating
       if (res.status === 202) {
@@ -209,15 +245,22 @@ const BlogPostList: React.FC = () => {
             post.id === id
               ? {
                   ...post,
-                  upvotes: votetype === "UPVOTE" ? post.upvotes + 1 : post.upvotes,
-                  downvotes: votetype === "DOWNVOTE" ? post.downvotes + 1 : post.downvotes,
+                  upvotes:
+                    votetype === "UPVOTE" ? post.upvotes + 1 : post.upvotes,
+                  downvotes:
+                    votetype === "DOWNVOTE"
+                      ? post.downvotes + 1
+                      : post.downvotes,
                 }
               : post
           )
         );
       }
     } catch (err: any) {
-      console.error("Failed to rate the post:", err.response?.data?.error || err.message);
+      console.error(
+        "Failed to rate the post:",
+        err.response?.data?.error || err.message
+      );
     }
   };
 
@@ -227,9 +270,14 @@ const BlogPostList: React.FC = () => {
     setSortOrder("desc");
   };
 
-  
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1
+        className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+        onClick={() => router.push("/")}
+      >
+        Scriptorium
+      </h1>
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-400">Blog Posts</h1>
@@ -257,12 +305,16 @@ const BlogPostList: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Description</label>
+              <label className="text-sm font-medium text-gray-700">
+                Description
+              </label>
               <input
                 type="text"
                 placeholder="Search by description"
                 value={searchParams.description}
-                onChange={(e) => handleSearchChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleSearchChange("description", e.target.value)
+                }
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -277,7 +329,9 @@ const BlogPostList: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Content</label>
+              <label className="text-sm font-medium text-gray-700">
+                Content
+              </label>
               <input
                 type="text"
                 placeholder="Search by content"
@@ -287,12 +341,16 @@ const BlogPostList: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Template</label>
+              <label className="text-sm font-medium text-gray-700">
+                Template
+              </label>
               <input
                 type="text"
                 placeholder="Search by template"
                 value={searchParams.templateTitle}
-                onChange={(e) => handleSearchChange("templateTitle", e.target.value)}
+                onChange={(e) =>
+                  handleSearchChange("templateTitle", e.target.value)
+                }
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -300,10 +358,16 @@ const BlogPostList: React.FC = () => {
               {isAdmin ? (
                 <div className="flex space-x-2">
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">Sort by</label>
+                    <label className="text-sm font-medium text-gray-700">
+                      Sort by
+                    </label>
                     <select
                       value={sortBy}
-                      onChange={(e) => handleSortTypeChange(e.target.value as "rating" | "reports")}
+                      onChange={(e) =>
+                        handleSortTypeChange(
+                          e.target.value as "rating" | "reports"
+                        )
+                      }
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     >
                       <option value="rating">Rating</option>
@@ -311,17 +375,23 @@ const BlogPostList: React.FC = () => {
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">Order</label>
+                    <label className="text-sm font-medium text-gray-700">
+                      Order
+                    </label>
                     <select
                       value={sortOrder}
                       onChange={(e) => setSortOrder(e.target.value)}
                       className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                     >
                       <option value="desc">
-                        {sortBy === "reports" ? "Most Reported" : "Highest Rated"}
+                        {sortBy === "reports"
+                          ? "Most Reported"
+                          : "Highest Rated"}
                       </option>
                       <option value="asc">
-                        {sortBy === "reports" ? "Least Reported" : "Lowest Rated"}
+                        {sortBy === "reports"
+                          ? "Least Reported"
+                          : "Lowest Rated"}
                       </option>
                     </select>
                   </div>
@@ -329,7 +399,9 @@ const BlogPostList: React.FC = () => {
               ) : (
                 // Non-admin sort control
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Sort by Rating</label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Sort by Rating
+                  </label>
                   <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value)}
@@ -360,92 +432,95 @@ const BlogPostList: React.FC = () => {
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {blogPosts.map((post) => {
-            const isAuthor = currentUserId === post.user.id;
-            const shouldShow = !post.isHidden || isAdmin || isAuthor;
-            return shouldShow && (
-            <div 
-              key={post.id} 
-              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow`}
-            >
-            <div className="p-6">
-                {(isAdmin || (isAuthor && post.isHidden)) && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {isAdmin && post.report_count > 0 && (
-                      <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
-                        🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
-                      </span>
+          const isAuthor = currentUserId === post.user.id;
+          const shouldShow = !post.isHidden || isAdmin || isAuthor;
+          return (
+            shouldShow && (
+              <div
+                key={post.id}
+                className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow`}
+              >
+                <div className="p-6">
+                  {(isAdmin || (isAuthor && post.isHidden)) && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {isAdmin && post.report_count > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                          🚩 {post.report_count} report
+                          {post.report_count !== 1 ? "s" : ""}
+                        </span>
+                      )}
+                      {post.isHidden && (
+                        <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                          🚫 Hidden
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <Link href={`/blogposts/${post.id}`}>
+                    <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
+                      {post.title}
+                    </h2>
+                  </Link>
+
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {post.description}
+                  </p>
+
+                  <div className="space-y-2 mb-4">
+                    {post.tag && (
+                      <div className="flex items-center">
+                        <span className="inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">
+                          {post.tag}
+                        </span>
+                      </div>
                     )}
-                    {post.isHidden && (
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                        🚫 Hidden
-                      </span>
+
+                    <div className="flex items-center text-sm text-gray-500">
+                      <UserAvatar user={post.user} />
+                      <div className="ml-2">
+                        <p className="font-medium hover:underline cursor-pointer">
+                          {post.user.firstName} {post.user.lastName}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {isAdmin && (
+                      <div className="mt-4 flex items-center space-x-2">
+                        <button
+                          onClick={() =>
+                            handleToggleHide(post.id, post.isHidden)
+                          }
+                          className={`inline-flex items-center px-3 py-1 rounded-md transition-colors
+                        ${
+                          post.isHidden
+                            ? "bg-green-50 text-green-700 hover:bg-green-100"
+                            : "bg-red-50 text-red-700 hover:bg-red-100"
+                        }`}
+                        >
+                          {post.isHidden ? "👁️ Unhide" : "🚫 Hide"} Post
+                        </button>
+                      </div>
                     )}
-                  </div>
-                )}
-              <Link href={`/blogposts/${post.id}`}>
-                <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
-                  {post.title}
-                </h2>
-              </Link>
-              
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {post.description}
-              </p>
-              
-              <div className="space-y-2 mb-4">
-                {post.tag && (
-                  <div className="flex items-center">
-                    <span className="inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">
-                      {post.tag}
-                    </span>
-                  </div>
-                )}
-                
-                <div className="flex items-center text-sm text-gray-500">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-xs">
-                    {post.user.firstName[0]}
-                  </div>
-                  <div className="ml-2">
-                    <Link href={`/users/${post.user.id}`}>
-                      <p className="font-medium hover:underline cursor-pointer">
-                        {post.user.firstName} {post.user.lastName}
-                      </p>
-                    </Link>
+                    <button
+                      onClick={() => handleVote(post.id, "UPVOTE")}
+                      className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
+                    >
+                      👍 {post.upvotes}
+                    </button>
+                    <button
+                      onClick={() => handleVote(post.id, "DOWNVOTE")}
+                      className="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors"
+                    >
+                      👎 {post.downvotes}
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center space-x-2">
-                {isAdmin && (
-                  <div className="mt-4 flex items-center space-x-2">
-                    <button
-                      onClick={() => handleToggleHide(post.id, post.isHidden)}
-                      className={`inline-flex items-center px-3 py-1 rounded-md transition-colors
-                        ${post.isHidden 
-                          ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-                          : 'bg-red-50 text-red-700 hover:bg-red-100'
-                        }`}
-                    >
-                      {post.isHidden ? '👁️ Unhide' : '🚫 Hide'} Post
-                    </button>
-                  </div>
-                )}
-                <button
-                  onClick={() => handleVote(post.id, "UPVOTE")}
-                  className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
-                >
-                  👍 {post.upvotes}
-                </button>
-                <button
-                  onClick={() => handleVote(post.id, "DOWNVOTE")}
-                  className="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors"
-                >
-                  👎 {post.downvotes}
-                </button>
-              </div>
-            </div>
-          </div>
-        )})}
+            )
+          );
+        })}
       </div>
 
       {/* Pagination */}
@@ -461,11 +536,11 @@ const BlogPostList: React.FC = () => {
         >
           ← Previous
         </button>
-        
+
         <span className="text-sm font-medium text-gray-700">
           Page {page} of {totalPages}
         </span>
-        
+
         <button
           onClick={() => handlePageChange(page + 1)}
           disabled={page === totalPages}

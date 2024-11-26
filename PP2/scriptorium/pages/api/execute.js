@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
   const { code, language, stdin } = req.body;
   if (!code || !language) {
-    return res.status(400).json({ error: 'Code and language are required' });
+    return res.status(400).json({ error: "Code and language are required" });
   }
 
   const langConfig = LANGUAGE_CONFIG[language];
