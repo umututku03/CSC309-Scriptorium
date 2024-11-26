@@ -16,27 +16,9 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-  const [quote, setQuote] = useState("");
   const router = useRouter();
 
-  const quotes = [
-    "Knowledge is power.",
-    "The pen is mightier than the sword.",
-    "Ideas shape the course of history.",
-    "Creativity takes courage.",
-    "Dream big, work hard.",
-  ];
 
-  useEffect(() => {
-    const changeQuote = () => {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      setQuote(quotes[randomIndex]);
-    };
-
-    changeQuote();
-    const interval = setInterval(changeQuote, 5000); // Change quote every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -85,7 +67,6 @@ export default function Signup() {
           className="w-24 h-24 mx-auto transition-all transform hover:scale-110"
         />
         <h1 className="text-4xl font-extrabold mt-4">Scriptorium</h1>
-        <p className="mt-4 text-xl italic text-blue-600">{quote}</p>
       </div>
 
       {/* Signup Form */}

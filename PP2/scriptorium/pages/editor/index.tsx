@@ -67,9 +67,9 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, language, stdin }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok) {
         setOutput(data.stdout || "Code executed successfully with no output.");
         setStatus("success"); // Set status to success
@@ -89,7 +89,7 @@ export default function Home() {
       setLoading(false);
     }
   };
-  
+
 
 
   const saveTemplate = async () => {
@@ -240,17 +240,24 @@ export default function Home() {
             </button>
           )}
         </div>
-
+        
         <pre
-          className={`w-full p-4 text-lg border rounded-md transition-colors duration-200 ${status === "success"
-              ? "bg-green-100 text-green-800 border-green-300"
-              : status === "error"
-                ? "bg-red-100 text-red-800 border-red-300"
-                : "bg-muted text-muted-foreground border-border"
+          className={`w-full p-4 text-lg border rounded-md transition-colors duration-200 overflow-x-auto whitespace-pre-wrap ${status === "success"
+            ? "bg-green-100 text-green-800 border-green-300"
+            : status === "error"
+              ? "bg-red-100 text-red-800 border-red-300"
+              : "bg-muted text-muted-foreground border-border"
             }`}
+          style={{
+            maxHeight: "300px", // Restrict height to avoid overflow
+            overflowY: "auto", // Add vertical scrolling if content exceeds max height
+            overflowX: "auto", // Allow horizontal scrolling for long lines
+            wordBreak: "break-word", // Prevent long words from overflowing
+          }}
         >
           {output}
         </pre>
+
 
 
         {showSaveModal && (

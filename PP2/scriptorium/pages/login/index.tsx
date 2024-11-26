@@ -49,13 +49,6 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* Quotes */}
-      <div className="mb-8 text-center text-lg italic font-medium">
-        {theme === "dark"
-          ? `"In the midst of darkness, let your dreams shine."`
-          : `"Every day is a chance to write your story."`}
-      </div>
-
       <h1 className="text-3xl font-bold mb-6">Welcome Back!</h1>
 
       {/* Login Form */}
