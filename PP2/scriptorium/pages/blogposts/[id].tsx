@@ -125,7 +125,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
   currentUserId,
 }) => {
   const isAuthor = currentUserId === comment.user.id;
-  const shouldShow = !comment.isHidden || isAdmin || isAuthor;
+  const shouldShow = !comment.isHidden || isAuthor || isAdmin;
 
   return (
     <div className="bg-card rounded-lg p-4 border border-border">
@@ -150,10 +150,14 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
           )}
         </div>
       </div>
-      
+
       {/* Comment Content */}
-      <p className="text-foreground ml-10 mb-3">{comment.content}</p>
-      
+      {shouldShow ? (
+        <p className="text-foreground ml-10 mb-3">{comment.content}</p>
+      ) : (
+        <p className="text-muted-foreground ml-10 mb-3 italic">This comment is hidden.</p>
+      )}
+
       {/* Comment Actions */}
       <div className="ml-10 space-x-3 mb-3">
         {isAdmin && (
@@ -168,34 +172,38 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
             {comment.isHidden ? '👁️ Unhide' : '🚫 Hide'}
           </button>
         )}
-        <button
-          onClick={() => onVote(comment.id, "UPVOTE")}
-          className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
-        >
-          👍 {comment.upvotes}
-        </button>
-        <button
-          onClick={() => onVote(comment.id, "DOWNVOTE")}
-          className="inline-flex items-center px-2 py-1 bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors duration-200 text-sm"
-        >
-          👎 {comment.downvotes}
-        </button>
-        <button
-          onClick={() => onReport(comment.id)}
-          className="inline-flex items-center px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded hover:bg-yellow-500/20 transition-colors duration-200 text-sm"
-        >
-          🚩 Report
-        </button>
-        <button
-          onClick={() => onReply(comment.id)}
-          className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
-        >
-          ↩️ Reply
-        </button>
+        {shouldShow && (
+          <>
+            <button
+              onClick={() => onVote(comment.id, "UPVOTE")}
+              className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
+            >
+              👍 {comment.upvotes}
+            </button>
+            <button
+              onClick={() => onVote(comment.id, "DOWNVOTE")}
+              className="inline-flex items-center px-2 py-1 bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors duration-200 text-sm"
+            >
+              👎 {comment.downvotes}
+            </button>
+            <button
+              onClick={() => onReport(comment.id)}
+              className="inline-flex items-center px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded hover:bg-yellow-500/20 transition-colors duration-200 text-sm"
+            >
+              🚩 Report
+            </button>
+            <button
+              onClick={() => onReply(comment.id)}
+              className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
+            >
+              ↩️ Reply
+            </button>
+          </>
+        )}
       </div>
 
       {/* Reply Form */}
-      {replyingTo === comment.id && (
+      {replyingTo === comment.id && shouldShow && (
         <div className="ml-10 mt-3">
           <textarea
             value={replyContent}
@@ -230,7 +238,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
           >
             {expandedComments.has(comment.id) ? "▼" : "▶"} {comment.children.length} {comment.children.length > 1 ? "Replies" : "Reply"}
           </button>
-          
+
           {expandedComments.has(comment.id) && (
             <div className="mt-3 pl-4 border-l-2 border-border space-y-3">
               {comment.children.map((reply) => (
@@ -258,7 +266,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
       )}
     </div>
   );
-}
+};
 
 
 
