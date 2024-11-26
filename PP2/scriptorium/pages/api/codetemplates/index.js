@@ -27,6 +27,13 @@ export default async function handler(req, res) {
               id: true,
             },
           },
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            }
+          }
         },
       });
 
