@@ -133,7 +133,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
       <div className="flex text-gray-500 items-center mb-2">
         <UserAvatar user={comment.user} />
         <div className="ml-2">
-          <p className="font-medium hover:underline cursor-pointer">
+          <p className="font-medium">
             {comment.user.firstName} {comment.user.lastName}
           </p>
         </div>
@@ -793,7 +793,7 @@ const BlogPostDetail: React.FC = () => {
               <div className="text-sm text-gray-500 space-y-2">
               <div className="flex items-center">
                 <UserAvatar user={blogPost.user} />
-                <span className="ml-2 hover:underline cursor-pointer">
+                <span className="ml-2">
                   {blogPost.user.firstName} {blogPost.user.lastName}
                 </span>
               </div>

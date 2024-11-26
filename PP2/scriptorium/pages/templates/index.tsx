@@ -249,7 +249,7 @@ export default function TemplatesPage() {
                 <div className="flex items-center text-sm text-gray-500 mt-4">
                   <UserAvatar user={template.user} />
                   <div className="ml-2">
-                    <p className="font-medium hover:underline cursor-pointer">
+                    <p className="font-medium">
                       {template.user.firstName} {template.user.lastName}
                     </p>
                   </div>
