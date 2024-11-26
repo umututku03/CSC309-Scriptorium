@@ -110,46 +110,10 @@ export default function Home() {
     }
   };
 
-  const handleLogin = () => {
-    // Redirect to login page
-    router.push("/login");
-  };
-
-  const handleLogout = () => {
-    // Clear tokens and update state
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    setIsAuthenticated(false);
-    setAccessToken("");
-  };
-
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] text-lg`}
     >
-      <header className="flex justify-between items-center w-full max-w-4xl">
-        <h1
-          className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          Scriptorium
-        </h1>
-        {isAuthenticated ? (
-          <button
-            className="p-2 bg-red-600 text-white rounded hover:bg-red-500"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-        ) : (
-          <button
-            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-            onClick={handleLogin}
-          >
-            Login
-          </button>
-        )}
-      </header>
       <main className="flex flex-col gap-8 w-full max-w-4xl">
         {/* Add navigation buttons */}
         <div className="flex flex-wrap gap-4">
@@ -163,18 +127,6 @@ export default function Home() {
               </button>
             </>
           )}
-          <button
-            onClick={() => router.push("/blogposts")}
-            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-          >
-            Explore Posts
-          </button>
-          <button
-            onClick={() => router.push("/templates")}
-            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-          >
-            Explore Templates
-          </button>
         </div>
         <div className="flex gap-4 items-center flex-col sm:flex-row w-full">
           <select
@@ -187,6 +139,13 @@ export default function Home() {
             <option value="java">Java</option>
             <option value="c">C</option>
             <option value="cpp">C++</option>
+            <option value="go">Python</option>
+            <option value="rs">Rust</option>
+            <option value="rb">Ruby</option>
+            <option value="php">PHP</option>
+            <option value="swift">Swift</option>
+            <option value="pl">Perl</option>
+            <option value="r">R</option>
           </select>
         </div>
         <CodeMirror
@@ -203,7 +162,21 @@ export default function Home() {
               ? langs.cpp()
               : language === "cpp"
               ? langs.cpp()
-              : [],
+              : language === "go"
+              ? langs.go()
+              : language === "rs"
+              ? langs.rust()
+              : language === "ruby"
+              ? langs.ruby()
+              : language === "php"
+              ? langs.php()
+              : language === "swift"
+              ? langs.swift()
+              : language === "pl"
+              ? langs.perl()
+              : language === "r"
+              ? langs.r()
+              : []
           ]}
           onChange={(value) => setCode(value)}
         />
