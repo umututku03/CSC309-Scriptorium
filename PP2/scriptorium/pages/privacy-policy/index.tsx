@@ -1,45 +1,71 @@
-<nav className="flex items-center justify-between px-6 py-4 bg-gray-800 text-white shadow-md">
-  <div className="flex items-center gap-4">
-    <Image
-      src="/logo.svg" // Ensure this is a high-quality SVG or PNG
-      alt="Scriptorium Logo"
-      width={40}
-      height={40}
-      className="rounded-md"
-    />
-    <span className="text-xl font-bold">Scriptorium</span>
-  </div>
-  <div className="flex items-center gap-6">
-    <Link href="/" className="hover:underline hover:text-gray-300">
-      Home
-    </Link>
-    <Link href="/templates" className="hover:underline hover:text-gray-300">
-      Templates
-    </Link>
-    <Link href="/blog" className="hover:underline hover:text-gray-300">
-      Blog
-    </Link>
-    <Link href="/about" className="hover:underline hover:text-gray-300">
-      About Us
-    </Link>
-    <div className="relative group">
-      <button className="flex items-center gap-2 hover:text-gray-300">
-        Profile
-        <Image
-          src="/icons/user.svg" // Ensure this icon is high quality
-          alt="User Icon"
-          width={16}
-          height={16}
-        />
-      </button>
-      <div className="absolute right-0 mt-2 hidden w-40 bg-white text-black border border-gray-200 shadow-md group-hover:block">
-        <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100">
-          My Profile
-        </Link>
-        <Link href="/logout" className="block px-4 py-2 hover:bg-gray-100">
-          Logout
-        </Link>
-      </div>
+// pages/privacy-policy.tsx
+export default function PrivacyPolicy() {
+  return (
+    <div className="w-full bg-background">
+      {/* Header Section */}
+      <header className="bg-gradient-to-r from-primary to-primary/70 text-primary-foreground py-16 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>
+          <p className="text-lg max-w-3xl mx-auto opacity-90">
+            Welcome to Scriptorium! We are committed to protecting your privacy and ensuring
+            the security of your personal information.
+          </p>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-card rounded-xl shadow-md p-8 text-card-foreground">
+            {/* Introduction */}
+            <div className="text-center mb-12">
+              <p className="text-muted-foreground">
+                This Privacy Policy outlines how we collect,
+                use, and safeguard your data.
+              </p>
+            </div>
+
+            {/* Information Collection */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-semibold mb-4">Information We Collect</h2>
+              <p className="text-muted-foreground">
+                We may collect personal information such as your name, email address, and activity on
+                the platform to improve your experience and provide better services.
+              </p>
+            </section>
+
+            {/* Information Usage */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-semibold mb-4">How We Use Your Information</h2>
+              <p className="text-muted-foreground">
+                Your information is used solely for enhancing your experience on our platform. We do not
+                share or sell your data to third parties.
+              </p>
+            </section>
+
+            {/* Contact Section */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+              <p className="text-muted-foreground">
+                If you have any questions about this Privacy Policy, please contact us at{" "}
+                <a 
+                  href="mailto:support@scriptorium.com" 
+                  className="text-primary hover:text-primary/80 transition-colors duration-200"
+                >
+                  support@scriptorium.com
+                </a>.
+              </p>
+            </section>
+
+            {/* Last Updated */}
+            <div className="text-center mt-8">
+              <p className="text-sm text-muted-foreground">
+                Last updated: {new Date().toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-  </div>
-</nav>
+  );
+}

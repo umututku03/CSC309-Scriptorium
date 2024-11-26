@@ -32,7 +32,7 @@ const BlogPostList: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<string>("desc"); // "asc", "desc", or null
+  const [sortOrder, setSortOrder] = useState<string>("desc");
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("rating");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -232,90 +232,90 @@ const BlogPostList: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-400">Blog Posts</h1>
+        <h1 className="text-3xl font-bold text-foreground">Blog Posts</h1>
         <button
           onClick={() => router.push("/blogposts/create")}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring transition-colors duration-200"
         >
           ✏️ Create New Post
         </button>
       </div>
 
       {/* Filters Card */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div className="bg-card rounded-lg shadow-md p-6 mb-8">
         <div className="space-y-6">
           {/* Search Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Title</label>
+              <label className="text-sm font-medium text-muted-foreground">Title</label>
               <input
                 type="text"
                 placeholder="Search by title"
                 value={searchParams.title}
                 onChange={(e) => handleSearchChange("title", e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Description</label>
+              <label className="text-sm font-medium text-muted-foreground">Description</label>
               <input
                 type="text"
                 placeholder="Search by description"
                 value={searchParams.description}
                 onChange={(e) => handleSearchChange("description", e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Tag</label>
+              <label className="text-sm font-medium text-muted-foreground">Tag</label>
               <input
                 type="text"
                 placeholder="Search by tag"
                 value={searchParams.tag}
                 onChange={(e) => handleSearchChange("tag", e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Content</label>
+              <label className="text-sm font-medium text-muted-foreground">Content</label>
               <input
                 type="text"
                 placeholder="Search by content"
                 value={searchParams.content}
                 onChange={(e) => handleSearchChange("content", e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Template</label>
+              <label className="text-sm font-medium text-muted-foreground">Template</label>
               <input
                 type="text"
                 placeholder="Search by template"
                 value={searchParams.templateTitle}
                 onChange={(e) => handleSearchChange("templateTitle", e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-1">
               {isAdmin ? (
                 <div className="flex space-x-2">
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">Sort by</label>
+                    <label className="text-sm font-medium text-muted-foreground">Sort by</label>
                     <select
                       value={sortBy}
                       onChange={(e) => handleSortTypeChange(e.target.value as "rating" | "reports")}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                     >
                       <option value="rating">Rating</option>
                       <option value="reports">Reports</option>
                     </select>
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-medium text-gray-700">Order</label>
+                    <label className="text-sm font-medium text-muted-foreground">Order</label>
                     <select
                       value={sortOrder}
                       onChange={(e) => setSortOrder(e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                      className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                     >
                       <option value="desc">
                         {sortBy === "reports" ? "Most Reported" : "Highest Rated"}
@@ -327,13 +327,12 @@ const BlogPostList: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                // Non-admin sort control
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Sort by Rating</label>
+                  <label className="text-sm font-medium text-muted-foreground">Sort by Rating</label>
                   <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    className="w-full p-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
                   >
                     <option value="desc">Highest Rated</option>
                     <option value="asc">Lowest Rated</option>
@@ -348,11 +347,11 @@ const BlogPostList: React.FC = () => {
       {/* Loading and Error States */}
       {loading && (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       )}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-6">
           {error}
         </div>
       )}
@@ -360,92 +359,91 @@ const BlogPostList: React.FC = () => {
       {/* Blog Posts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {blogPosts.map((post) => {
-            const isAuthor = currentUserId === post.user.id;
-            const shouldShow = !post.isHidden || isAdmin || isAuthor;
-            return shouldShow && (
+          const isAuthor = currentUserId === post.user.id;
+          const shouldShow = !post.isHidden || isAdmin || isAuthor;
+          return shouldShow && (
             <div 
               key={post.id} 
-              className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow`}
+              className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200"
             >
-            <div className="p-6">
+              <div className="p-6">
                 {(isAdmin || (isAuthor && post.isHidden)) && (
                   <div className="flex flex-wrap gap-2 mb-2">
                     {isAdmin && post.report_count > 0 && (
-                      <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center px-2 py-1 bg-destructive/10 text-destructive rounded-full text-xs font-medium">
                         🚩 {post.report_count} report{post.report_count !== 1 ? 's' : ''}
                       </span>
                     )}
                     {post.isHidden && (
-                      <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center px-2 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
                         🚫 Hidden
                       </span>
                     )}
                   </div>
                 )}
-              <Link href={`/blogposts/${post.id}`}>
-                <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
-                  {post.title}
-                </h2>
-              </Link>
-              
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {post.description}
-              </p>
-              
-              <div className="space-y-2 mb-4">
-                {post.tag && (
-                  <div className="flex items-center">
-                    <span className="inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">
-                      {post.tag}
-                    </span>
-                  </div>
-                )}
+                <Link href={`/blogposts/${post.id}`}>
+                  <h2 className="text-xl font-semibold text-card-foreground hover:text-primary transition-colors duration-200 mb-2">
+                    {post.title}
+                  </h2>
+                </Link>
                 
-                <div className="flex items-center text-sm text-gray-500">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium text-xs">
-                    {post.user.firstName[0]}
-                  </div>
-                  <div className="ml-2">
-                    <Link href={`/users/${post.user.id}`}>
-                      <p className="font-medium hover:underline cursor-pointer">
-                        {post.user.firstName} {post.user.lastName}
-                      </p>
-                    </Link>
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                  {post.description}
+                </p>
+                
+                <div className="space-y-2 mb-4">
+                  {post.tag && (
+                    <div className="flex items-center">
+                      <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                        {post.tag}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center font-medium text-xs">
+                      {post.user.firstName[0]}
+                    </div>
+                    <div className="ml-2">
+                      <Link href={`/users/${post.user.id}`}>
+                        <p className="font-medium hover:text-foreground transition-colors duration-200 cursor-pointer">
+                          {post.user.firstName} {post.user.lastName}
+                        </p>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-2">
-                {isAdmin && (
-                  <div className="mt-4 flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  {isAdmin && (
                     <button
                       onClick={() => handleToggleHide(post.id, post.isHidden)}
-                      className={`inline-flex items-center px-3 py-1 rounded-md transition-colors
+                      className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-200
                         ${post.isHidden 
-                          ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-                          : 'bg-red-50 text-red-700 hover:bg-red-100'
+                          ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                          : 'bg-destructive/10 text-destructive hover:bg-destructive/20'
                         }`}
                     >
                       {post.isHidden ? '👁️ Unhide' : '🚫 Hide'} Post
                     </button>
-                  </div>
-                )}
-                <button
-                  onClick={() => handleVote(post.id, "UPVOTE")}
-                  className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors"
-                >
-                  👍 {post.upvotes}
-                </button>
-                <button
-                  onClick={() => handleVote(post.id, "DOWNVOTE")}
-                  className="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors"
-                >
-                  👎 {post.downvotes}
-                </button>
+                  )}
+                  <button
+                    onClick={() => handleVote(post.id, "UPVOTE")}
+                    className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors duration-200"
+                  >
+                    👍 {post.upvotes}
+                  </button>
+                  <button
+                    onClick={() => handleVote(post.id, "DOWNVOTE")}
+                    className="inline-flex items-center px-3 py-1 bg-destructive/10 text-destructive rounded-md hover:bg-destructive/20 transition-colors duration-200"
+                  >
+                    👎 {post.downvotes}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )})}
+          );
+        })}
       </div>
 
       {/* Pagination */}
@@ -453,26 +451,26 @@ const BlogPostList: React.FC = () => {
         <button
           onClick={() => handlePageChange(page - 1)}
           disabled={page === 1}
-          className={`px-4 py-2 rounded-md transition-colors ${
+          className={`px-4 py-2 rounded-md transition-colors duration-200 ${
             page === 1
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
+              ? "bg-muted text-muted-foreground cursor-not-allowed"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
           ← Previous
         </button>
         
-        <span className="text-sm font-medium text-gray-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Page {page} of {totalPages}
         </span>
         
         <button
           onClick={() => handlePageChange(page + 1)}
           disabled={page === totalPages}
-          className={`px-4 py-2 rounded-md transition-colors ${
+          className={`px-4 py-2 rounded-md transition-colors duration-200 ${
             page === totalPages
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
+              ? "bg-muted text-muted-foreground cursor-not-allowed"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
           Next →
