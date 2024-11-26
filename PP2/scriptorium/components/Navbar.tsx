@@ -16,6 +16,7 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
+    setMenuOpen(false)
     // Check for tokens in localStorage
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -193,30 +194,30 @@ export default function Navbar() {
               >
                 About Us
               </Link>
-              <Link
-                href="/profile"
-                className="px-6 py-4 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
-                onClick={() => setMenuOpen(false)}
-              >
-                Edit Profile
-              </Link>
               {isAuthenticated ? 
                 (
-                    <Link
-                  href="/"
-                  className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
-                  onClick={handleLogout}
+                  <><Link
+                    href="/profile"
+                    className="px-6 py-4 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
+                    onClick={() => setMenuOpen(false)}
                   >
-                    Logout
-                  </Link>
+                    Edit Profile
+                  </Link><Link
+                    href="/"
+                    className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
+                    onClick={handleLogout}
+                  >
+                      Logout
+                    </Link></>
                 ):
                 (
-                  <button
-                  className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
+                  <Link
+                  href="/login"
+                  className="px-6 py-4 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
                   onClick={handleLogin}
                   >
                     Login
-                  </button>
+                  </Link>
                 )
               }
             </div>
