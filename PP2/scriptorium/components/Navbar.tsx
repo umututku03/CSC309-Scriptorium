@@ -3,13 +3,25 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import { useRouter } from "next/router";
+
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [accessToken, setAccessToken] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const router = useRouter();
+
   useEffect(() => {
+    // Check for tokens in localStorage
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setIsAuthenticated(true);
+      setAccessToken(token);
+    }
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
@@ -18,7 +30,21 @@ export default function Navbar() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [router]);
+
+  const handleLogin = () => {
+    // Redirect to login page
+    router.push("/login");
+  };
+
+  const handleLogout = () => {
+    // Clear tokens and update state
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setIsAuthenticated(false);
+    setAccessToken("");
+    setProfileOpen(false);
+  };
 
   return (
     <>
@@ -33,9 +59,12 @@ export default function Navbar() {
               height={40}
               className="rounded-md"
             />
-            <span className="text-2xl font-bold text-foreground">
-              Scriptorium
-            </span>
+            <Link
+              href="/"
+              className="text-2xl font-bold text-foreground"
+            >
+            Scriptorium
+            </Link>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -68,7 +97,8 @@ export default function Navbar() {
             <ThemeToggle />
 
             {/* Profile Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            {isAuthenticated ?
+            (<div className="relative" ref={dropdownRef}>
               <button 
                 className="flex items-center gap-2 text-secondary-text hover:text-foreground transition-colors duration-200"
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -92,22 +122,24 @@ export default function Navbar() {
                     My Profile
                   </Link>
                   <Link 
-                    href="/settings" 
-                    className="block px-4 py-2 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    Settings
-                  </Link>
-                  <Link 
-                    href="/logout" 
+                    href="/" 
                     className="block px-4 py-2 text-red-600 dark:text-red-400 hover:bg-secondary/50 rounded-b-md transition-colors duration-200"
-                    onClick={() => setProfileOpen(false)}
+                    onClick={handleLogout}
                   >
                     Logout
                   </Link>
                 </div>
               )}
-            </div>
+            </div>)
+            :(
+            <button
+            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+            onClick={handleLogin}
+          >
+            Login
+          </button>
+            ) 
+            }
           </div>
 
           {/* Mobile Menu Button */}
@@ -166,22 +198,27 @@ export default function Navbar() {
                 className="px-6 py-4 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
                 onClick={() => setMenuOpen(false)}
               >
-                Profile
+                Edit Profile
               </Link>
-              <Link
-                href="/settings"
-                className="px-6 py-4 text-secondary-text hover:bg-secondary/50 hover:text-foreground transition-colors duration-200"
-                onClick={() => setMenuOpen(false)}
-              >
-                Settings
-              </Link>
-              <Link
-                href="/logout"
-                className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
-                onClick={() => setMenuOpen(false)}
-              >
-                Logout
-              </Link>
+              {isAuthenticated ? 
+                (
+                    <Link
+                  href="/"
+                  className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
+                  onClick={handleLogout}
+                  >
+                    Logout
+                  </Link>
+                ):
+                (
+                  <button
+                  className="px-6 py-4 text-red-600 dark:text-red-400 hover:bg-secondary/50 transition-colors duration-200"
+                  onClick={handleLogin}
+                  >
+                    Login
+                  </button>
+                )
+              }
             </div>
           </div>
         )}
