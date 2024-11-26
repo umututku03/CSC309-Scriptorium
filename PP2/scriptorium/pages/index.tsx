@@ -1,5 +1,8 @@
 // pages/index.tsx
+import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [code, setCode] = useState("");
