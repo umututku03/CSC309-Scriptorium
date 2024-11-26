@@ -29,7 +29,6 @@ interface BlogPost {
   isHidden: boolean;
 }
 
-// Add this interface near the top with other interfaces
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -62,26 +61,26 @@ const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, onSubmit, ty
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-card text-card-foreground rounded-lg p-6 max-w-md w-full mx-4 shadow-lg border border-border">
         <h3 className="text-lg font-semibold mb-4">Report {type}</h3>
         <textarea
           value={reportContent}
           onChange={(e) => setReportContent(e.target.value)}
           placeholder="Please describe why you're reporting this content..."
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px] mb-4"
+          className="w-full p-3 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground min-h-[100px] mb-4 transition-colors duration-200"
         />
         <div className="flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+            className="px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md transition-colors duration-200"
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+            className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Report'}
@@ -126,95 +125,103 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
   currentUserId,
 }) => {
   const isAuthor = currentUserId === comment.user.id;
-  const shouldShow = !comment.isHidden || isAdmin || isAuthor;
+  const shouldShow = !comment.isHidden || isAuthor || isAdmin;
+
   return (
-    <div className="bg-gray-50 rounded-lg p-4">
+    <div className="bg-card rounded-lg p-4 border border-border">
       {/* User Info */}
-      <div className="flex text-gray-500 items-center mb-2">
+      <div className="flex text-muted-foreground items-center mb-2">
         <UserAvatar user={comment.user} />
         <div className="ml-2">
-          <p className="font-medium">
+          <p className="font-medium text-card-foreground">
             {comment.user.firstName} {comment.user.lastName}
           </p>
         </div>
         <div className="flex items-center space-x-2 ml-4">
           {isAdmin && comment.report_count > 0 && (
-            <span className="px-2 py-1 bg-red-50 text-red-600 rounded-full text-xs font-medium">
+            <span className="px-2 py-1 bg-destructive/10 text-destructive rounded-full text-xs font-medium">
               🚩 {comment.report_count} report{comment.report_count !== 1 ? 's' : ''}
             </span>
           )}
           {comment.isHidden && (isAdmin || isAuthor) && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+            <span className="px-2 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium">
               🚫 Hidden
             </span>
           )}
         </div>
       </div>
-      
+
       {/* Comment Content */}
-      <p className="text-gray-700 ml-10 mb-3">{comment.content}</p>
-      
+      {shouldShow ? (
+        <p className="text-foreground ml-10 mb-3">{comment.content}</p>
+      ) : (
+        <p className="text-muted-foreground ml-10 mb-3 italic">This comment is hidden.</p>
+      )}
+
       {/* Comment Actions */}
       <div className="ml-10 space-x-3 mb-3">
-
         {isAdmin && (
           <button
             onClick={() => onToggleHide(comment.id, comment.isHidden)}
-            className={`inline-flex items-center px-2 py-1 rounded transition-colors text-sm
+            className={`inline-flex items-center px-2 py-1 rounded transition-colors duration-200 text-sm
               ${comment.isHidden 
-                ? 'bg-green-50 text-green-700 hover:bg-green-100' 
-                : 'bg-red-50 text-red-700 hover:bg-red-100'
+                ? 'bg-primary/10 text-primary hover:bg-primary/20' 
+                : 'bg-destructive/10 text-destructive hover:bg-destructive/20'
               }`}
           >
             {comment.isHidden ? '👁️ Unhide' : '🚫 Hide'}
           </button>
         )}
-        <button
-          onClick={() => onVote(comment.id, "UPVOTE")}
-          className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors text-sm"
-        >
-          👍 {comment.upvotes}
-        </button>
-        <button
-          onClick={() => onVote(comment.id, "DOWNVOTE")}
-          className="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors text-sm"
-        >
-          👎 {comment.downvotes}
-        </button>
-        <button
-          onClick={() => onReport(comment.id)}
-          className="inline-flex items-center px-2 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition-colors text-sm"
-        >
-          🚩 Report
-        </button>
-        <button
-          onClick={() => onReply(comment.id)}
-          className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors text-sm"
-        >
-          ↩️ Reply
-        </button>
+        {shouldShow && (
+          <>
+            <button
+              onClick={() => onVote(comment.id, "UPVOTE")}
+              className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
+            >
+              👍 {comment.upvotes}
+            </button>
+            <button
+              onClick={() => onVote(comment.id, "DOWNVOTE")}
+              className="inline-flex items-center px-2 py-1 bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors duration-200 text-sm"
+            >
+              👎 {comment.downvotes}
+            </button>
+            <button
+              onClick={() => onReport(comment.id)}
+              className="inline-flex items-center px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded hover:bg-yellow-500/20 transition-colors duration-200 text-sm"
+            >
+              🚩 Report
+            </button>
+            <button
+              onClick={() => onReply(comment.id)}
+              className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
+            >
+              ↩️ Reply
+            </button>
+          </>
+        )}
       </div>
 
       {/* Reply Form */}
-      {replyingTo === comment.id && (
+      {replyingTo === comment.id && shouldShow && (
         <div className="ml-10 mt-3">
           <textarea
             value={replyContent}
             onChange={(e) => onReplyContentChange(e.target.value)}
             placeholder="Write your reply..."
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+            className="w-full p-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
             rows={3}
           />
           <div className="mt-2 space-x-2">
             <button
               onClick={() => onPostReply(comment.id)}
-              className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+              className="px-3 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200 text-sm"
             >
               Post Reply
             </button>
             <button
               onClick={onCancelReply}
-              className="px-3 py-1 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 text-sm"
+              className="px-3 py-1 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors duration-200 text-sm"
             >
               Cancel
             </button>
@@ -227,13 +234,13 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
         <div className="ml-10">
           <button
             onClick={() => onToggleReplies(comment.id)}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            className="text-primary hover:text-primary/80 text-sm font-medium transition-colors duration-200"
           >
-            {expandedComments.has(comment.id) ? "▼" : "▶"} {comment.children.length} { comment.children.length > 1 ? "Replies" : "Reply" }
+            {expandedComments.has(comment.id) ? "▼" : "▶"} {comment.children.length} {comment.children.length > 1 ? "Replies" : "Reply"}
           </button>
-          
+
           {expandedComments.has(comment.id) && (
-            <div className="mt-3 pl-4 border-l-2 border-gray-200 space-y-3">
+            <div className="mt-3 pl-4 border-l-2 border-border space-y-3">
               {comment.children.map((reply) => (
                 <CommentComponent
                   key={reply.id}
@@ -259,7 +266,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
       )}
     </div>
   );
-}
+};
 
 
 
@@ -757,14 +764,14 @@ const BlogPostDetail: React.FC = () => {
   }, [id, sortOrder, sortBy]);
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>
   );
   
   if (error) return (
-    <div className="max-w-4xl mx-auto mt-8 bg-white rounded-lg shadow-md p-6">
-      <div className="text-red-500 flex items-center justify-center">
+    <div className="max-w-4xl mx-auto mt-8 bg-card rounded-lg shadow-md p-6">
+      <div className="text-destructive flex items-center justify-center">
         <span className="mr-2">⚠️</span>
         {error}
       </div>
@@ -772,8 +779,8 @@ const BlogPostDetail: React.FC = () => {
   );
   
   if (!blogPost) return (
-    <div className="max-w-4xl mx-auto mt-8 bg-white rounded-lg shadow-md p-6">
-      <div className="text-gray-500 flex items-center justify-center">
+    <div className="max-w-4xl mx-auto mt-8 bg-card rounded-lg shadow-md p-6">
+      <div className="text-muted-foreground flex items-center justify-center">
         No blog post found.
       </div>
     </div>
@@ -782,22 +789,22 @@ const BlogPostDetail: React.FC = () => {
   const isOwner = blogPost.user.id === currentUserId;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 bg-background">
       {/* Main Blog Post Card */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+      <div className="bg-card rounded-lg shadow-md overflow-hidden mb-8 border border-border">
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl text-black font-bold mb-2">{blogPost.title}</h1>
-              <div className="text-sm text-gray-500 space-y-2">
-              <div className="flex items-center">
-                <UserAvatar user={blogPost.user} />
-                <span className="ml-2">
-                  {blogPost.user.firstName} {blogPost.user.lastName}
-                </span>
-              </div>
-                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+              <h1 className="text-3xl font-bold text-card-foreground mb-2">{blogPost.title}</h1>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <div className="flex items-center">
+                  <UserAvatar user={blogPost.user} />
+                  <span className="ml-2">
+                    {blogPost.user.firstName} {blogPost.user.lastName}
+                  </span>
+                </div>
+                <span className="inline-block px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm">
                   {blogPost.tag}
                 </span>
               </div>
@@ -807,13 +814,13 @@ const BlogPostDetail: React.FC = () => {
               <div className="flex space-x-2">
                 <button 
                   onClick={() => router.push(`/blogposts/edit/${id}`)}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 py-2 border border-border rounded-md text-sm font-medium text-muted-foreground bg-card hover:bg-muted transition-colors duration-200"
                 >
                   ✏️ Edit
                 </button>
                 <button 
                   onClick={handleDelete}
-                  className="inline-flex items-center px-3 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="inline-flex items-center px-3 py-2 border border-destructive rounded-md text-sm font-medium text-destructive bg-card hover:bg-destructive/10 transition-colors duration-200"
                 >
                   🗑️ Delete
                 </button>
@@ -822,20 +829,20 @@ const BlogPostDetail: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="prose max-w-none mb-6 text-black">
+          <div className="prose dark:prose-invert max-w-none mb-6 text-foreground">
             {parseContent(blogPost.content)}
           </div>
 
           {/* Linked Templates */}
           {blogPost.templates.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-lg text-black font-semibold mb-2">Linked Templates</h3>
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">Linked Templates</h3>
               <div className="flex flex-wrap gap-2">
                 {blogPost.templates.map((template) => (
                   <Link 
                     key={template.id} 
                     href={`/templates/${template.id}`}
-                    className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm hover:bg-blue-100 transition-colors"
+                    className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors duration-200"
                   >
                     {template.title}
                   </Link>
@@ -844,39 +851,23 @@ const BlogPostDetail: React.FC = () => {
             </div>
           )}
 
-          <ReportModal
-              isOpen={showReportModal}
-              onClose={() => {
-                setShowReportModal(false);
-                setReportingCommentId(null);
-              }}
-              onSubmit={async (content) => {
-                if (reportingCommentId) {
-                  await handleCommentReport(reportingCommentId, content);
-                } else {
-                  await handleReport(content);
-                }
-              }}
-              type={reportingCommentId ? 'comment' : 'post'}
-            />
-
           {/* Interaction Buttons */}
-          <div className="flex items-center space-x-4 mt-6 pt-6 border-t">
+          <div className="flex items-center space-x-4 mt-6 pt-6 border-t border-border">
             <button
               onClick={() => handleVote("UPVOTE")}
-              className="inline-flex items-center px-4 py-2 rounded-md bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200"
             >
               👍 {blogPost.upvotes}
             </button>
             <button
               onClick={() => handleVote("DOWNVOTE")}
-              className="inline-flex items-center px-4 py-2 rounded-md bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors duration-200"
             >
               👎 {blogPost.downvotes}
             </button>
             <button
               onClick={() => setShowReportModal(true)}
-              className="inline-flex items-center px-4 py-2 rounded-md bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-colors"
+              className="inline-flex items-center px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-500/20 transition-colors duration-200"
             >
               🚩 Report
             </button>
@@ -885,34 +876,35 @@ const BlogPostDetail: React.FC = () => {
       </div>
 
       {/* Comments Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl text-black font-bold mb-6">Comments</h2>
+      <div className="bg-card rounded-lg shadow-md p-6 border border-border">
+        <h2 className="text-xl font-bold text-card-foreground mb-6">Comments</h2>
 
-        <div className="flex items-center">
-        {isAdmin && (
-            <div className="flex items-center">
-              <label htmlFor="sortBy" className="mr-2 text-gray-600">
+        <div className="flex items-center mb-6">
+          {isAdmin && (
+            <div className="flex items-center mr-4">
+              <label htmlFor="sortBy" className="mr-2 text-muted-foreground">
                 Sort by:
               </label>
               <select
                 id="sortBy"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "rating" | "reports")}
-                className="border border-gray-300 rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-background border border-border rounded-md px-3 py-1 text-foreground focus:ring-2 focus:ring-ring transition-colors duration-200"
               >
                 <option value="rating">Rating</option>
                 <option value="reports">Report Count</option>
               </select>
             </div>
           )}
-            <label htmlFor="sortOrder" className="mr-2 text-gray-600">
-              Sort by:
+          <div className="flex items-center">
+            <label htmlFor="sortOrder" className="mr-2 text-muted-foreground">
+              Order:
             </label>
             <select
               id="sortOrder"
               value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
-              className="border border-gray-300 rounded-md px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="bg-background border border-border rounded-md px-3 py-1 text-foreground focus:ring-2 focus:ring-ring transition-colors duration-200"
             >
               <option value="desc">
                 {sortBy === "reports" ? "Most reported first" : "Highest rating"}
@@ -922,6 +914,7 @@ const BlogPostDetail: React.FC = () => {
               </option>
             </select>
           </div>
+        </div>
         
         {/* New Comment Form */}
         <div className="mb-6">
@@ -929,52 +922,70 @@ const BlogPostDetail: React.FC = () => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full p-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+            className="w-full p-3 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground min-h-[100px] transition-colors duration-200"
           />
           <button
             onClick={postComment}
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
           >
             Post Comment
           </button>
         </div>
 
-        <div className="border-t pt-6">
+        <div className="border-t border-border pt-6">
           {blogPost.comments.length > 0 ? (
             <div className="space-y-6">
-              {blogPost.comments.filter(comment => comment.parentId === null).map((comment) => (
-                <CommentComponent
-                key={comment.id}
-                comment={comment}
-                onVote={handleCommentVote}
-                onReport={handleCommentReportClick}
-                onToggleHide={handleCommentToggleHide} // Add this
-                onReply={setReplyingTo}
-                onCancelReply={() => {
-                  setReplyingTo(null);
-                  setReplyContent("");
-                }}
-                onPostReply={postReply}
-                replyingTo={replyingTo}
-                replyContent={replyContent}
-                onReplyContentChange={(content) => setReplyContent(content)}
-                expandedComments={expandedComments}
-                onToggleReplies={toggleReplies}
-                isAdmin={isAdmin}
-                currentUserId={currentUserId}
-              />
-              ))}
+              {blogPost.comments
+                .filter(comment => comment.parentId === null)
+                .map((comment) => (
+                  <CommentComponent
+                    key={comment.id}
+                    comment={comment}
+                    onVote={handleCommentVote}
+                    onReport={handleCommentReportClick}
+                    onToggleHide={handleCommentToggleHide}
+                    onReply={setReplyingTo}
+                    onCancelReply={() => {
+                      setReplyingTo(null);
+                      setReplyContent("");
+                    }}
+                    onPostReply={postReply}
+                    replyingTo={replyingTo}
+                    replyContent={replyContent}
+                    onReplyContentChange={(content) => setReplyContent(content)}
+                    expandedComments={expandedComments}
+                    onToggleReplies={toggleReplies}
+                    isAdmin={isAdmin}
+                    currentUserId={currentUserId}
+                  />
+                ))}
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-muted-foreground py-8">
               No comments yet. Be the first to comment!
             </div>
           )}
         </div>
       </div>
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+          setReportingCommentId(null);
+        }}
+        onSubmit={async (content) => {
+          if (reportingCommentId) {
+            await handleCommentReport(reportingCommentId, content);
+          } else {
+            await handleReport(content);
+          }
+        }}
+        type={reportingCommentId ? 'comment' : 'post'}
+      />
     </div>
   );
-  
 };
 
 export default BlogPostDetail;

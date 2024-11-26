@@ -162,94 +162,94 @@ export default function TemplatesPage() {
   );
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-background text-foreground">
+      {/* Header */}
       <h1
-        className="text-4xl text-blue-900 font-bold mb-8 cursor-pointer"
+        className="text-4xl font-bold mb-8 cursor-pointer text-foreground"
         onClick={() => router.push("/")}
       >
         Scriptorium
       </h1>
-      <h1 className="text-2xl font-bold mb-4">Code Templates</h1>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 className="text-2xl font-bold mb-4 text-foreground">Code Templates</h2>
+
+      {/* Search Filters */}
+      <div className="bg-card rounded-lg shadow-md p-6 mb-8 border border-border">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Title</label>
+            <label className="text-sm font-medium text-muted-foreground">Title</label>
             <input
               type="text"
               placeholder="Search by title"
               value={searchParams.title}
               onChange={(e) => handleSearchChange("title", e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">
-              Explanation
-            </label>
+            <label className="text-sm font-medium text-muted-foreground">Explanation</label>
             <input
               type="text"
               placeholder="Search by explanation"
               value={searchParams.explanation}
-              onChange={(e) =>
-                handleSearchChange("explanation", e.target.value)
-              }
-              className="w-full p-2 border rounded-md"
+              onChange={(e) => handleSearchChange("explanation", e.target.value)}
+              className="w-full p-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Tags</label>
+            <label className="text-sm font-medium text-muted-foreground">Tags</label>
             <input
               type="text"
               placeholder="Search by tag"
               value={searchParams.tags}
               onChange={(e) => handleSearchChange("tags", e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-ring text-foreground placeholder:text-muted-foreground transition-colors duration-200"
             />
           </div>
         </div>
       </div>
 
+      {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md mb-6">
           {error}
         </div>
       )}
 
+      {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Log templates before rendering */}
         {displayedTemplates.map((template) => (
           <div
             key={template.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+            className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-200 border border-border"
           >
             <div className="p-6">
               <Link href={`/templates/${template.id}`}>
-                <h2 className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors mb-2">
+                <h2 className="text-xl font-semibold text-card-foreground hover:text-primary transition-colors duration-200 mb-2">
                   {template.title}
                 </h2>
               </Link>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                 {template.explanation}
               </p>
-              <div className="flex items-center">
+              <div className="flex items-center flex-wrap gap-2">
                 {template.tags
                   .split(" ")
                   .map((tag) => tag.trim())
                   .map((tag) => (
                     <span
                       key={tag}
-                      className="inline-block px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full mr-2"
+                      className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
                     >
                       {tag}
                     </span>
                   ))}
               </div>
-              {/* Display the owner of the template */}
+              {/* Template Owner */}
               {template.user && (
-                <div className="flex items-center text-sm text-gray-500 mt-4">
+                <div className="flex items-center text-sm text-muted-foreground mt-4">
                   <UserAvatar user={template.user} />
                   <div className="ml-2">
-                    <p className="font-medium">
+                    <p className="font-medium hover:text-foreground transition-colors duration-200">
                       {template.user.firstName} {template.user.lastName}
                     </p>
                   </div>
@@ -259,29 +259,37 @@ export default function TemplatesPage() {
           </div>
         ))}
         {displayedTemplates.length === 0 && !error && (
-          <p className="text-center text-gray-500">No templates found.</p>
+          <p className="text-center text-muted-foreground col-span-full py-8">
+            No templates found.
+          </p>
         )}
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-8 gap-4">
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-500 text-white rounded mr-2 disabled:bg-gray-300"
+            className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+              currentPage === 1
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            }`}
           >
             Previous
           </button>
-          <span className="px-4 py-2">
+          <span className="px-4 py-2 text-muted-foreground">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-500 text-white rounded ml-2 disabled:bg-gray-300"
+            className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+              currentPage === totalPages
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            }`}
           >
             Next
           </button>

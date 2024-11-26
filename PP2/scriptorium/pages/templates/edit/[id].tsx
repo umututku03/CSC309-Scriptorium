@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import axios from "axios"; // Import axios
+import axios from "axios";
 
 export default function EditTemplate() {
   const router = useRouter();
   const { id } = router.query;
-  // Remove useSession
-  // const { data: session } = useSession();
 
   const [title, setTitle] = useState("");
   const [explanation, setExplanation] = useState("");
@@ -80,7 +78,7 @@ export default function EditTemplate() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-background text-foreground">
       <h1 className="text-2xl font-bold mb-4">Edit Template</h1>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1" htmlFor="title">
