@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import Link from "next/link";
 
 interface UserData {
   firstName: string;
@@ -60,7 +59,7 @@ export default function ViewProfile() {
     };
 
     fetchUserData();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
@@ -88,57 +87,40 @@ export default function ViewProfile() {
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <div className="bg-card rounded-lg shadow-lg p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-card-foreground">
-                My Profile
+          <div className="flex flex-col md:flex-row items-center md:items-start md:gap-8">
+            {/* User Avatar */}
+            <div className="flex-shrink-0">
+              <img
+                src={userData.avatar || "/icons/profile-pic.jpg"}
+                alt="User Avatar"
+                className="w-36 h-36 rounded-full border border-border shadow-md object-cover"
+              />
+            </div>
+
+            {/* User Info */}
+            <div className="flex-1 space-y-4 text-center md:text-left mt-6 md:mt-0">
+              <h1 className="text-3xl font-bold text-card-foreground">
+                {userData.firstName} {userData.lastName}
               </h1>
-              <p className="text-muted-foreground mt-1">
-                View your personal information
+              <p className="text-muted-foreground text-lg">
+                <span className="font-medium">Email:</span> {userData.email}
+              </p>
+              <p className="text-muted-foreground text-lg">
+                <span className="font-medium">Phone:</span> {userData.phone || "N/A"}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col items-center space-y-6">
-            {/* Avatar */}
-            <img
-              src={userData.avatar || "icons/profile-pic.jpg"}
-              alt="User Avatar"
-              className="w-32 h-32 rounded-full border border-border shadow-md"
-            />
+          {/* Divider */}
+          <hr className="my-6 border-border" />
 
-            {/* User Info */}
-            <div className="w-full">
-              <p className="text-lg font-medium text-muted-foreground">
-                Full Name:
-              </p>
-              <p className="text-foreground text-xl font-semibold">
-                {userData.firstName} {userData.lastName}
-              </p>
-            </div>
-            <div className="w-full">
-              <p className="text-lg font-medium text-muted-foreground">
-                Email:
-              </p>
-              <p className="text-foreground text-xl font-semibold">
-                {userData.email}
-              </p>
-            </div>
-            <div className="w-full">
-              <p className="text-lg font-medium text-muted-foreground">
-                Phone:
-              </p>
-              <p className="text-foreground text-xl font-semibold">
-                {userData.phone || "N/A"}
-              </p>
-            </div>
-
-            {/* Edit Button */}
+          {/* Edit Profile Button */}
+          <div className="text-center">
             <button
               onClick={() => router.push("/profile/edit")}
-              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
             >
               Edit Profile
             </button>

@@ -24,6 +24,7 @@ export default function Home() {
   const [templateTitle, setTemplateTitle] = useState("");
   const [templateExplanation, setTemplateExplanation] = useState("");
   const [templateTags, setTemplateTags] = useState("");
+  const [status, setStatus] = useState("neutral"); // New state for execution status
 
   const defaultTemplates: Record<string, string> = {
     py: `# Python Template\nprint("Hello, World!")`,
@@ -59,6 +60,7 @@ export default function Home() {
   const runCode = async () => {
     setLoading(true);
     setOutput(""); // Clear previous output
+    setStatus("neutral"); // Reset status to neutral before running
     try {
       const response = await fetch("/api/execute", {
         method: "POST",
@@ -70,28 +72,25 @@ export default function Home() {
   
       if (response.ok) {
         setOutput(data.stdout || "Code executed successfully with no output.");
+        setStatus("success"); // Set status to success
       } else {
-        // Handle various error scenarios based on the response
         const errorMessage =
           data.error ||
           "An error occurred during code execution. Please check your code and try again.";
-  
-        // Append additional details if available
-        const errorDetails = data.details
-          ? `\nDetails:\n${data.details}`
-          : "";
-  
+        const errorDetails = data.details ? `\nDetails:\n${data.details}` : "";
         const formattedError = `Error: ${errorMessage}${errorDetails}`;
         setOutput(formattedError);
+        setStatus("error"); // Set status to error
       }
     } catch (error) {
-      // Handle unexpected network or system errors
       setOutput("Network error: Unable to reach the server.");
+      setStatus("error"); // Set status to error for network failure
     } finally {
       setLoading(false);
     }
   };
   
+
 
   const saveTemplate = async () => {
     if (!templateTitle || !templateExplanation || !templateTags) {
@@ -192,26 +191,26 @@ export default function Home() {
               language === "py"
                 ? langs.python()
                 : language === "js"
-                ? langs.javascript()
-                : language === "java"
-                ? langs.java()
-                : language === "c" || language === "cpp"
-                ? langs.cpp()
-                : language === "go"
-                ? langs.go()
-                : language === "rs"
-                ? langs.rust()
-                : language === "rb"
-                ? langs.ruby()
-                : language === "php"
-                ? langs.php()
-                : language === "swift"
-                ? langs.swift()
-                : language === "pl"
-                ? langs.perl()
-                : language === "r"
-                ? langs.r()
-                : []
+                  ? langs.javascript()
+                  : language === "java"
+                    ? langs.java()
+                    : language === "c" || language === "cpp"
+                      ? langs.cpp()
+                      : language === "go"
+                        ? langs.go()
+                        : language === "rs"
+                          ? langs.rust()
+                          : language === "rb"
+                            ? langs.ruby()
+                            : language === "php"
+                              ? langs.php()
+                              : language === "swift"
+                                ? langs.swift()
+                                : language === "pl"
+                                  ? langs.perl()
+                                  : language === "r"
+                                    ? langs.r()
+                                    : []
             ]}
             onChange={(value) => setCode(value)}
           />
@@ -242,9 +241,17 @@ export default function Home() {
           )}
         </div>
 
-        <pre className="w-full p-4 text-lg bg-muted border border-border rounded-md text-muted-foreground">
+        <pre
+          className={`w-full p-4 text-lg border rounded-md transition-colors duration-200 ${status === "success"
+              ? "bg-green-100 text-green-800 border-green-300"
+              : status === "error"
+                ? "bg-red-100 text-red-800 border-red-300"
+                : "bg-muted text-muted-foreground border-border"
+            }`}
+        >
           {output}
         </pre>
+
 
         {showSaveModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50">
