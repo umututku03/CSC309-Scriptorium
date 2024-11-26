@@ -224,6 +224,8 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+      {/* Spacer div to prevent content from going under the navbar */}
+      <div className="h-16" />
     </>
   );
 }
