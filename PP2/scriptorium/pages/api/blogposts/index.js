@@ -59,7 +59,7 @@ export default async function handler(req, res) {
         catch (err) {
             return res.status(401).json({ error: "Unauthorized "});
         }
-        const { id, title, tag, content, description, templateTitle, pageSize, sortBy, sortOrder = "desc", page = 1 } = req.query;
+        const { id, title, tag, content, description, templateTitle, pageSize, sortBy, userId, sortOrder = "desc", page = 1 } = req.query;
 
         let limit = 10;
         if (pageSize) {
@@ -101,6 +101,7 @@ export default async function handler(req, res) {
                         },
                     }
                     : undefined,
+                    userId: userId ? parseInt(userId) : undefined
                 },
                 include: {
                     comments: {
