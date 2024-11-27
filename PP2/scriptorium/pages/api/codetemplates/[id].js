@@ -63,7 +63,7 @@ export default async function handler(req, res) {
           tags: existingTemplate.tags,
           language: existingTemplate.language,
           userId: authUser.userId, // Use the correctly retrieved userId
-          forkedFromId: 100,
+          forkedFromId: templateId,
           blogPosts: existingTemplate.blogPosts,
         },
       });
