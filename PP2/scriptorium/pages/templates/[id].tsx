@@ -63,7 +63,7 @@ export default function TemplateDetails() {
   const useTemplate = () => {
     if (template) {
       router.push({
-        pathname: "/",
+        pathname: "/editor",
         query: { code: template.code, language: template.language },
       });
     }
@@ -87,7 +87,7 @@ export default function TemplateDetails() {
         }
       );
       if (response.status === 201) {
-        alert("Template forked successfully.");
+        alert("Template forked and added to My Templates successfully!");
       } else {
         alert(`Error forking template: ${response.data.error}`);
       }
@@ -123,30 +123,6 @@ export default function TemplateDetails() {
   return (
     <div className="p-8 bg-background text-foreground">
       {/* Header */}
-      <h1
-        className="text-3xl font-bold mb-8 cursor-pointer text-foreground hover:text-primary/90 transition-colors duration-200"
-        onClick={() => router.push("/")}
-      >
-        Scriptorium
-      </h1>
-
-      {/* Navigation Buttons */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        {isAuthenticated && (
-          <button
-            onClick={() => router.push("/templates?mine=true")}
-            className="px-4 py-2 bg-card text-primary rounded-md hover:bg-muted transition-colors duration-200"
-          >
-            My Templates
-          </button>
-        )}
-        <button
-          onClick={() => router.push("/templates")}
-          className="px-4 py-2 bg-card text-primary rounded-md hover:bg-muted transition-colors duration-200"
-        >
-          Explore Templates
-        </button>
-      </div>
 
       {template && (
         <div className="space-y-6">
@@ -157,8 +133,11 @@ export default function TemplateDetails() {
             </h2>
             <p className="text-muted-foreground">{template.explanation}</p>
             <div className="flex flex-wrap gap-2">
-              {template.tags.split(' ').map(tag => (
-                <span key={tag} className="px-2 py-1 bg-primary/10 text-primary rounded-full text-sm">
+              {template.tags.split(" ").map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                >
                   {tag}
                 </span>
               ))}
@@ -195,14 +174,29 @@ export default function TemplateDetails() {
                   Fork Template
                 </button>
 
+                {template.forkedFromId && (
+                  <button
+                    onClick={() =>
+                      router.push(`/templates/${template.forkedFromId}`)
+                    }
+                    className="px-4 py-2 bg-primary text-destructive-foreground rounded-md hover:bg-muted/80 transition-colors duration-200"
+                  >
+                    View Original
+                  </button>
+                )}
+
                 {userId === template.userId && (
                   <>
                     <button
                       onClick={() => router.push(`/templates/edit/${id}`)}
-                      className="px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors duration-200"
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
                     >
                       Edit Template
                     </button>
+                  </>
+                )}
+                {userId === template.userId && (
+                  <>
                     <button
                       onClick={deleteTemplate}
                       className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition-colors duration-200"
@@ -212,15 +206,6 @@ export default function TemplateDetails() {
                   </>
                 )}
               </>
-            )}
-
-            {template.forkedFromId && (
-              <button
-                onClick={() => router.push(`/templates/${template.forkedFromId}`)}
-                className="px-4 py-2 bg-muted text-muted-foreground rounded-md hover:bg-muted/80 transition-colors duration-200"
-              >
-                View Original
-              </button>
             )}
           </div>
         </div>
