@@ -19,10 +19,10 @@ export default async function handler(req, res) {
         include: {
           blogPosts: {
             select: {
-              id: true
-            }
-          }
-        }
+              id: true,
+            },
+          },
+        },
       });
 
       if (!template) {
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       const existingTemplate = await prisma.codeTemplate.findUnique({
         where: { id: templateId },
       });
-  
+
       if (!existingTemplate) {
         return res.status(404).json({ error: "Template not found" });
       }
@@ -63,7 +63,8 @@ export default async function handler(req, res) {
           tags: existingTemplate.tags,
           language: existingTemplate.language,
           userId: authUser.userId, // Use the correctly retrieved userId
-          forkedFromId: templateId
+          forkedFromId: 100,
+          blogPosts: existingTemplate.blogPosts,
         },
       });
       return res.status(201).json(forkedTemplate);

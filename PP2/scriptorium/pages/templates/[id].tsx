@@ -16,6 +16,11 @@ export default function TemplateDetails() {
     language: string;
     userId: string;
     forkedFromId: number;
+    blogPosts: {
+      id: number;
+      title: string;
+      description: string;
+    }[];
   }
 
   const [template, setTemplate] = useState<Template | null>(null);
@@ -30,10 +35,12 @@ export default function TemplateDetails() {
       fetchUser(accessToken);
     }
   }, [id]);
-
+  console.log(template);
+  console.log("HELLO ");
   const fetchTemplate = async () => {
     try {
       const response = await axios.get(`/api/codetemplates/${id}`);
+
       if (response.status === 200) {
         setTemplate(response.data);
       } else {
@@ -142,6 +149,7 @@ export default function TemplateDetails() {
                 </span>
               ))}
             </div>
+
             {template.forkedFromId && (
               <div className="inline-flex items-center px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm">
                 Forked Template
@@ -207,6 +215,25 @@ export default function TemplateDetails() {
                 )}
               </>
             )}
+          </div>
+          {/* Blog Posts Section */}
+          <div>
+            <h2 className="text-xl ">Relevant Blogposts:</h2>
+            <ul className="list-disc list-inside marker:text-sm marker:text-blue-500">
+              {template.blogPosts.map((post) => (
+                <li
+                  key={post.id}
+                  className="marker:text-sm marker:text-primary ml-3"
+                >
+                  <a
+                    href={`/blog/${post.id}`}
+                    className=" hover:underline ml-2 mr-2"
+                  >
+                    {post.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
