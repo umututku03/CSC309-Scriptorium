@@ -78,7 +78,30 @@ export default async function handler(req, res) {
 
                     return res.status(200).json({ message: "Rating updated successfully", updatedRating });
                 } else {
-                    return res.status(201).json({ message: "No changes in votetype", existingRating });
+                    // Decrement the existing vote count
+                    if (blogPostId) {
+                        await prisma.blogPost.update({
+                            where: { id: blogPostId },
+                            data: {
+                                upvotes: existingRating.votetype === 'UPVOTE' ? { decrement: 1 } : undefined,
+                                downvotes: existingRating.votetype === 'DOWNVOTE' ? { decrement: 1 } : undefined
+                            }
+                        });
+                    } else if (commentId) {
+                        await prisma.comment.update({
+                            where: { id: commentId },
+                            data: {
+                                upvotes: existingRating.votetype === 'UPVOTE' ? { decrement: 1 } : undefined,
+                                downvotes: existingRating.votetype === 'DOWNVOTE' ? { decrement: 1 } : undefined,
+                            }
+                        });
+                    }
+                    // Delete the rating
+                    await prisma.rating.delete({
+                        where: { id: existingRating.id }
+                    });
+
+                    return res.status(201).json({ message: "Deleted rating", existingRating });
                 }
             } else {
                 // Create a new rating if no existing rating was found

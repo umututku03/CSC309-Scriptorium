@@ -14,6 +14,8 @@ interface Comment {
   parentId: number | null;
   report_count: number;
   isHidden: boolean;
+  userVote: string | null;
+  ratings: { userId: number; votetype: string}[];
 }
 
 interface BlogPost {
@@ -27,6 +29,7 @@ interface BlogPost {
   user: { firstName: string; lastName: string, id: number, avatar: string };
   comments: Comment[];
   isHidden: boolean;
+  ratings: { userId: number; votetype: string }[];
 }
 
 interface ReportModalProps {
@@ -176,13 +179,21 @@ const CommentComponent: React.FC<CommentComponentProps> = ({
           <>
             <button
               onClick={() => onVote(comment.id, "UPVOTE")}
-              className="inline-flex items-center px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors duration-200 text-sm"
+              className={`inline-flex items-center px-2 py-1 rounded transition-colors duration-200 text-sm
+                ${comment.userVote === "UPVOTE"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
+                }`}
             >
               👍 {comment.upvotes}
             </button>
             <button
               onClick={() => onVote(comment.id, "DOWNVOTE")}
-              className="inline-flex items-center px-2 py-1 bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors duration-200 text-sm"
+              className={`inline-flex items-center px-2 py-1 rounded transition-colors duration-200 text-sm
+                ${comment.userVote === "DOWNVOTE"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                }`}
             >
               👎 {comment.downvotes}
             </button>
@@ -287,6 +298,7 @@ const BlogPostDetail: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(null);
+  const [userVote, setUserVote] = useState<string | null>(null);
 
   const handleReport = async (content: string) => {
     if (!blogPost) return;
@@ -377,9 +389,26 @@ const BlogPostDetail: React.FC = () => {
     console.log(blogPostData.comments)
   }
 
+  const extractUserVote = (blogPostData: BlogPost, userId: number) => {
+    blogPostData.ratings.forEach((rating: { userId : number, votetype: string }) => {
+      if (rating.userId === userId) {
+        setUserVote(rating.votetype);
+      }
+    });
+
+    blogPostData.comments.forEach((comment: Comment) => {
+      comment.ratings.forEach((rating: { userId: number; votetype: string }) => {
+        if (rating.userId === userId) {
+          comment.userVote = rating.votetype;
+        }
+      })
+    });
+  }
+
   const fetchBlogPost = async () => {
     let accessToken = localStorage.getItem("accessToken"); // Or wherever you store the token
     let refreshToken = localStorage.getItem("refreshToken");
+    let currentUser;
     try {
       setLoading(true);
       if (accessToken) {
@@ -394,7 +423,7 @@ const BlogPostDetail: React.FC = () => {
             }
           }
         );
-        var currentUser = await axios.get(`/api/users/me`, {
+        currentUser = await axios.get(`/api/users/me`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -410,8 +439,10 @@ const BlogPostDetail: React.FC = () => {
         })
       }
       let blogPostData = response.data.blogPost;
-      console.log(response.data.blogPost);
-      processComments(blogPostData)
+      processComments(blogPostData);
+      if (currentUser) {
+        extractUserVote(blogPostData, currentUser.data.id);
+      }
       setBlogPost(blogPostData);
     } catch (err: any) {
       if (err.status === 401) {
@@ -433,7 +464,7 @@ const BlogPostDetail: React.FC = () => {
                 }
               );
               let blogPostData = response.data.blogPost;
-              processComments(blogPostData)
+              processComments(blogPostData);
               setBlogPost(blogPostData);
 
               currentUser = await axios.get(`/api/users/me`, {
@@ -443,6 +474,8 @@ const BlogPostDetail: React.FC = () => {
               });
               setCurrentUserId(currentUser.data.id);
               setIsAdmin(currentUser.data.role === 'ADMIN');
+              extractUserVote(blogPostData, currentUser.data.id);
+
             }
           }
           catch (err: any) {
@@ -497,8 +530,20 @@ const BlogPostDetail: React.FC = () => {
           upvotes: votetype === "UPVOTE" ? blogPost.upvotes + 1 : blogPost.upvotes - 1,
           downvotes: votetype === "DOWNVOTE" ? blogPost.downvotes + 1 : blogPost.downvotes - 1,
         }
+        setUserVote(votetype);
         setBlogPost(newBlogPost);
       } 
+
+      // Undo previous rating
+      if (res.status === 201) {
+        const newBlogPost = { 
+          ...blogPost, 
+          upvotes: votetype === "UPVOTE" ? blogPost.upvotes - 1 : blogPost.upvotes,
+          downvotes: votetype === "DOWNVOTE" ? blogPost.downvotes - 1 : blogPost.downvotes
+        }
+        setUserVote(null);
+        setBlogPost(newBlogPost);
+      }
 
       // Created new rating
       if (res.status === 202) {
@@ -507,6 +552,7 @@ const BlogPostDetail: React.FC = () => {
           upvotes: votetype === "UPVOTE" ? blogPost.upvotes + 1 : blogPost.upvotes,
           downvotes: votetype === "DOWNVOTE" ? blogPost.downvotes + 1 : blogPost.downvotes,
         }
+        setUserVote(votetype);
         setBlogPost(newBlogPost);
       }
     } catch (err: any) {
@@ -668,7 +714,7 @@ const BlogPostDetail: React.FC = () => {
         }
       );
   
-      if (res.status === 200 || res.status === 202) {
+      if (res.status === 200 || res.status === 201 || res.status === 202) {
         setBlogPost((prevBlogPost) => {
           if (!prevBlogPost) return null;
   
@@ -681,6 +727,15 @@ const BlogPostDetail: React.FC = () => {
                     ...comment,
                     upvotes: votetype === "UPVOTE" ? comment.upvotes + 1 : comment.upvotes - 1,
                     downvotes: votetype === "DOWNVOTE" ? comment.downvotes + 1 : comment.downvotes - 1,
+                    userVote: votetype
+                  };
+                }
+                else if (res.status === 201) {
+                  return {
+                    ...comment,
+                    upvotes: votetype === "UPVOTE" ? comment.upvotes - 1 : comment.upvotes,
+                    downvotes: votetype === "DOWNVOTE" ? comment.downvotes - 1 : comment.downvotes,
+                    userVote: null
                   };
                 }
                 else {
@@ -688,6 +743,7 @@ const BlogPostDetail: React.FC = () => {
                     ...comment,
                     upvotes: votetype === "UPVOTE" ? comment.upvotes + 1 : comment.upvotes,
                     downvotes: votetype === "DOWNVOTE" ? comment.downvotes + 1 : comment.downvotes,
+                    userVote: votetype
                   };
                 }
               }
@@ -852,16 +908,25 @@ const BlogPostDetail: React.FC = () => {
           )}
 
           {/* Interaction Buttons */}
+          {/* Interaction Buttons */}
           <div className="flex items-center space-x-4 mt-6 pt-6 border-t border-border">
             <button
               onClick={() => handleVote("UPVOTE")}
-              className="inline-flex items-center px-4 py-2 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors duration-200"
+              className={`inline-flex items-center px-4 py-2 rounded-md transition-colors duration-200 
+                ${userVote === "UPVOTE"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
+                }`}
             >
               👍 {blogPost.upvotes}
             </button>
             <button
               onClick={() => handleVote("DOWNVOTE")}
-              className="inline-flex items-center px-4 py-2 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors duration-200"
+              className={`inline-flex items-center px-4 py-2 rounded-md transition-colors duration-200
+                ${userVote === "DOWNVOTE"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                }`}
             >
               👎 {blogPost.downvotes}
             </button>
