@@ -131,7 +131,13 @@ export default async function handler(req, res) {
                             children: true,
                             parentId: true,
                             report_count: true,
-                            isHidden: true
+                            isHidden: true,
+                            ratings: {
+                                select: {
+                                    userId: true,
+                                    votetype: true
+                                }
+                            }
                         },
                         orderBy: orderBy
                     },
@@ -154,6 +160,12 @@ export default async function handler(req, res) {
                         select: {
                             id: true,
                             title: true
+                        }
+                    },
+                    ratings: {
+                        select: {
+                            userId: true,
+                            votetype: true
                         }
                     }
                 }

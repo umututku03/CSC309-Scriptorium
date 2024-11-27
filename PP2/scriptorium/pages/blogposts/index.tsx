@@ -15,6 +15,8 @@ interface BlogPost {
   user: { firstName: string; lastName: string; id: number; avatar: string; };
   report_count: number;
   isHidden: boolean;
+  ratings: { userId: number; votetype: string }[];
+  userVote: string | null;
 }
 
 const BlogPostList: React.FC = () => {
@@ -77,15 +79,25 @@ const BlogPostList: React.FC = () => {
     }
   };
 
+  const extractVoteTypes = (blogPosts: BlogPost[], userId: number) => {
+    blogPosts.forEach((blogPost: BlogPost) => {
+      blogPost.ratings.forEach((rating: { userId: number; votetype: string}) => {
+        if (rating.userId === userId) {
+          blogPost.userVote = rating.votetype;
+        }
+      })
+    })
+  } 
+
   const fetchBlogPosts = async () => {
     setLoading(true);
     setError(null);
     let accessToken = localStorage.getItem("accessToken");
     let refreshToken = localStorage.getItem("refreshToken");
-
+    let userResponse;
     try {
       if (accessToken) {
-        const userResponse = await axios.get("/api/users/me", {
+        userResponse = await axios.get("/api/users/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         setIsAdmin(userResponse.data.role === "ADMIN");
@@ -117,7 +129,9 @@ const BlogPostList: React.FC = () => {
           },
         });
       }
-
+      if (userResponse) {
+        extractVoteTypes(response.data.displayedPosts, userResponse.data.id);
+      }
       setBlogPosts(response.data.displayedPosts);
       setTotalPages(response.data.totalPages || 1);
     } catch (err: any) {
@@ -232,6 +246,26 @@ const BlogPostList: React.FC = () => {
                     votetype === "DOWNVOTE"
                       ? post.downvotes + 1
                       : post.downvotes - 1,
+                  userVote: votetype
+                }
+              : post
+          )
+        );
+      }
+
+      if (res.status === 201) {
+        setBlogPosts((prev) =>
+          prev.map((post) =>
+            post.id === id
+              ? {
+                  ...post,
+                  upvotes:
+                    votetype === "UPVOTE" ? post.upvotes - 1 : post.upvotes,
+                  downvotes:
+                    votetype === "DOWNVOTE"
+                      ? post.downvotes - 1
+                      : post.downvotes,
+                  userVote: null
                 }
               : post
           )
@@ -251,6 +285,7 @@ const BlogPostList: React.FC = () => {
                     votetype === "DOWNVOTE"
                       ? post.downvotes + 1
                       : post.downvotes,
+                  userVote: votetype
                 }
               : post
           )
@@ -466,17 +501,25 @@ const BlogPostList: React.FC = () => {
                       </button>
                     )}
                     <button
-                      onClick={() => handleVote(post.id, "UPVOTE")}
-                      className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors duration-200"
-                    >
-                      👍 {post.upvotes}
-                    </button>
-                    <button
-                      onClick={() => handleVote(post.id, "DOWNVOTE")}
-                      className="inline-flex items-center px-3 py-1 bg-destructive/10 text-destructive rounded-md hover:bg-destructive/20 transition-colors duration-200"
-                    >
-                      👎 {post.downvotes}
-                    </button>
+                    onClick={() => handleVote(post.id, "UPVOTE")}
+                    className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-200
+                      ${post.userVote === "UPVOTE"
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "bg-primary/10 text-primary hover:bg-primary/20"
+                      }`}
+                  >
+                    👍 {post.upvotes}
+                  </button>
+                  <button
+                    onClick={() => handleVote(post.id, "DOWNVOTE")}
+                    className={`inline-flex items-center px-3 py-1 rounded-md transition-colors duration-200
+                      ${post.userVote === "DOWNVOTE"
+                        ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        : "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                      }`}
+                  >
+                    👎 {post.downvotes}
+                  </button>
                   </div>
                 </div>
               </div>

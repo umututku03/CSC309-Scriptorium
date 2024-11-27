@@ -128,6 +128,12 @@ export default async function handler(req, res) {
                             id: true,
                             title: true
                         }
+                    },
+                    ratings: {
+                        select: {
+                            userId: true,
+                            votetype: true
+                        }
                     }
                 },
                 orderBy: orderBy
