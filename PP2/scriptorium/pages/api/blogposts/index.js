@@ -97,7 +97,6 @@ export default async function handler(req, res) {
                         some: {
                             title: {
                                 contains: templateTitle,
-                                mode: "insensitive",
                             },
                         },
                     }
