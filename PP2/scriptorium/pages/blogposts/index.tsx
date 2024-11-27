@@ -30,7 +30,8 @@ const BlogPostList: React.FC = () => {
     tag: string | string[];
     content: string | string[];
     templateTitle: string | string[];
-    userId?: number;
+    id?: number;
+    author?: string;
   }>({
     title: query.title || "",
     description: query.description || "",
@@ -109,8 +110,9 @@ const BlogPostList: React.FC = () => {
           sortOrder,
           sortBy,
         };
-
-        requestParams.userId = userResponse.data.id;
+        if (router.query.author === "me") {
+          requestParams.id = userResponse.data.id;
+        }
 
         var response = await axios.get(`/api/blogposts`, {
           headers: {
@@ -190,8 +192,10 @@ const BlogPostList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchBlogPosts();
-  }, [page, searchParams, sortOrder, sortBy]);
+    if (router.isReady) {
+      fetchBlogPosts();
+    }
+  }, [page, searchParams, sortOrder, sortBy, router.isReady]);
 
   const updateQueryParams = (params: any) => {
     router.push(
@@ -304,7 +308,6 @@ const BlogPostList: React.FC = () => {
     // Reset sort order to desc when changing sort type
     setSortOrder("desc");
   };
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 bg-background text-foreground">
       {/* Header Section */}
