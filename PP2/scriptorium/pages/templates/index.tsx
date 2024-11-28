@@ -39,7 +39,7 @@ export default function TemplatesPage() {
     setError(null);
     let accessToken = localStorage.getItem("accessToken");
     let refreshToken = localStorage.getItem("refreshToken");
-    const isMine = searchParams.mine === "true";
+    const isMine = router.query.mine === "true";
     const requestParams = { ...searchParams }; // Remove limit and offset
     try {
       let response;
@@ -136,8 +136,10 @@ export default function TemplatesPage() {
   };
 
   useEffect(() => {
-    fetchTemplates();
-  }, [searchParams]); // Remove currentPage from dependencies
+    if (router.isReady) {
+      fetchTemplates();
+    }
+  }, [searchParams, router.isReady]); // Remove currentPage from dependencies
 
   const handleSearchChange = (key: string, value: string) => {
     const newSearchParams = { ...searchParams, [key]: value };

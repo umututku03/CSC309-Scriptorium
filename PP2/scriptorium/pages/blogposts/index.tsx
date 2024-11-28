@@ -30,7 +30,7 @@ const BlogPostList: React.FC = () => {
     tag: string | string[];
     content: string | string[];
     templateTitle: string | string[];
-    id?: number;
+    userId?: number;
     author?: string;
   }>({
     title: query.title || "",
@@ -111,9 +111,8 @@ const BlogPostList: React.FC = () => {
           sortBy,
         };
         if (router.query.author === "me") {
-          requestParams.id = userResponse.data.id;
+          requestParams.userId = userResponse.data.id;
         }
-
         var response = await axios.get(`/api/blogposts`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
